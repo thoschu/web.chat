@@ -6,7 +6,7 @@ RUN apt-get update
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN apt-get install -y node npm git
+RUN apt-get install -y nodejs npm git
 RUN apt-get update
 
 COPY . /usr/src/app
