@@ -1,5 +1,4 @@
 FROM phusion/baseimage
-docker image
 
 MAINTAINER <Tom S.>
 
