@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM phusion/baseimage
 
 MAINTAINER <Tom S.>
 
