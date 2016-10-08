@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+iFROM ubuntu:latest
 
 MAINTAINER <Tom S.>
 
