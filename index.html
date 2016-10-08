@@ -27,8 +27,8 @@
             form input {
                 border: 0;
                 padding: 10px;
-                width: 90%;
-                margin-right: .5%;
+                width: 100%;
+                margin-right: 0%;
             }
 
             form button {
@@ -36,6 +36,7 @@
                 background: rgb(130, 224, 255);
                 border: none;
                 padding: 10px;
+                margin: 5px;
             }
 
             #messages {
@@ -70,12 +71,13 @@
             </div>
             <form class="col-md-12" action="">
                 <input id="m"  placeholder="Hier tippen..." autocomplete="off">
-                <button>Send</button>
+                <button class="center-block"><i class="fa fa-check-square-o" aria-hidden="true"></i></button>
             </form>
         </main>
         <footer class="row">
             <h6 class="col-md-12 text-center">&copy; by Tom S.</h6>
         </footer>
+        <script src="https://use.fontawesome.com/1c70b6a09c.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
