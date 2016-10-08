@@ -10,6 +10,7 @@
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
+                font-family: 'Gloria Hallelujah', cursive;
             }
 
             body {
@@ -17,7 +18,7 @@
             }
 
             form {
-                background: #000;
+                background: white;
                 padding: 3px;
                 position: fixed;
                 bottom: 0;
@@ -25,18 +26,18 @@
             }
 
             form input {
-                border: 0;
+                border: 1px solid #c3c3c3;
                 padding: 10px;
                 width: 100%;
                 margin-right: 0%;
             }
 
             form button {
-                width: 9%;
-                background: rgb(130, 224, 255);
-                border: none;
-                padding: 10px;
-                margin: 5px;
+                border: 1px solid #c3c3c3;
+                width: 100%;
+                border-radius: 2px;
+                margin-top: 5px;
+                padding: 10px 0;
             }
 
             #messages {
@@ -50,10 +51,11 @@
             }
 
             #messages li:nth-child(odd) {
-                background: #eee;
+                background: #c3c3c3;
             }
         </style>
-        <link rel="icon" href="https://cdn2.iconfinder.com/data/icons/mixed-rounded-flat-icon/512/chat-32.png" type="image/x-icon" />
+        <link rel="icon" href="https://cdn2.iconfinder.com/data/icons/mixed-rounded-flat-icon/512/chat-32.png" type="image/x-icon">
+        <link href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah" rel="stylesheet">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
         <!--[if lt IE 9]>
@@ -63,7 +65,7 @@
     </head>
     <body class="container">
         <header class="row">
-            <h1 class="col-md-12 text-center">Moin!</h1>
+            <h1 class="col-md-12 text-center">chat.server360.io</h1>
         </header>
         <main class="row">
             <div class="col-md-12">
