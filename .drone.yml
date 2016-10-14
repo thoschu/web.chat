@@ -1,5 +1,5 @@
 build:
-  image: node
+  image: nodejs
   commands:
     - npm -d install
 
