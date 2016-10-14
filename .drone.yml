@@ -1,0 +1,11 @@
+build:
+  image: node
+  commands:
+    - npm -d install
+
+publish:
+  docker:
+    username: thoschu
+    password: Dr?130777!
+    email: thoschulte@googlemail.com
+    repo: thoschu/hello-world-test
