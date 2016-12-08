@@ -62,8 +62,24 @@
             <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
             <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
+        <script type="text/javascript">
+            var _paq = _paq || [];
+            _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+            _paq.push(["setCookieDomain", "*.server360.io"]);
+            _paq.push(["setDomains", ["*.server360.io","*.www.server360.io"]]);
+            _paq.push(['trackPageView']);
+            _paq.push(['enableLinkTracking']);
+            (function() {
+                var u="//analytics.schulte360.de/";
+                _paq.push(['setTrackerUrl', u+'piwik.php']);
+                _paq.push(['setSiteId', '4']);
+                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+                g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+            })();
+        </script>
     </head>
     <body class="container">
+        <noscript class="row"><p class="col-md-12"><img class="img-fluid" src="//analytics.schulte360.de/piwik.php?idsite=4" style="border:0;" alt="" /></p></noscript>
         <header class="row">
             <h2 class="col-md-12 text-center">Moin...</h2>
             <h3 class="col-md-12 text-center">server360.io</h3>
