@@ -3,7 +3,7 @@ FROM phusion/baseimage
 MAINTAINER <Tom S.>
 
 RUN apt-get update
-RUN apt-get upgrade
+RUN apt-get -y upgrade
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
