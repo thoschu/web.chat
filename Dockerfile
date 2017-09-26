@@ -1,6 +1,6 @@
 FROM phusion/baseimage
 
-MAINTAINER <Tom S.>
+MAINTAINER <Tom S. >
 
 RUN apt-get update
 RUN apt-get -y upgrade
