@@ -19,6 +19,12 @@
   "homepage": "https://github.com/thoschu/de.schulte360.web.chat#readme",
   "dependencies": {
     "express": "4.10.2",
+    "js-csp": "^1.0.1",
+    "ramda": "^0.24.1",
     "socket.io": "1.2.0"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-buddyjs": "^0.1.2"
   }
 }
