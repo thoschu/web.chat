@@ -2,4 +2,4 @@
 
 ## https://chat.techstack.ch/
 
-### http://stechstack.ch:3000
+### http://techstack.ch:3000
