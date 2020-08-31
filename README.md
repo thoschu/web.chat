@@ -1,4 +1,4 @@
-# thoschu/web.chat
+# ch.techstack.web.chat
 
 ## https://chat.techstack.ch/
 
