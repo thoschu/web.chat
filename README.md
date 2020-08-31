@@ -1,8 +1,5 @@
-# de.schulte360.web.chat
+# thoschu/web.chat
 
-## http://chat.server360.io/
+## https://chat.techstack.ch/
 
-
-
-### http://xchat.server360.io/
-### http://server360.io:3000
+### http://stechstack.ch:3000
