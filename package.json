@@ -18,10 +18,10 @@
   },
   "homepage": "https://github.com/thoschu/de.schulte360.web.chat#readme",
   "dependencies": {
-    "express": "4.10.2",
+    "express": "4.15.3",
     "js-csp": "^1.0.1",
     "ramda": "^0.24.1",
-    "socket.io": "1.2.0"
+    "socket.io": "2.0.0"
   },
   "devDependencies": {
     "grunt": "^1.0.1",
