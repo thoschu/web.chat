@@ -10,8 +10,16 @@
     "rm": "docker rm chat",
     "logs": "docker logs chat",
     "test": "docker scout quickview",
-    "build": "docker build . -t thoschu/chat",
-    "_chat": "docker run -d -p 80:3000 --name chat -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
+    "build": "npm run build:amd64 && npm run build:arm64",
+    "build:amd64": "npm run build:amd64:2.0.0 && npm run build:amd64:latest",
+    "build:amd64:latest": "docker buildx build --platform=linux/amd64 -t thoschu/chat .",
+    "build:amd64:2.0.0": "docker buildx build --platform=linux/amd64  -t thoschu/chat:2.0.0 .",
+    "build:arm64": "npm run build:arm64:2.0.0 && npm run build:arm64:latest",
+    "build:arm64:latest": "docker build . -t thoschu/chat",
+    "build:arm64:2.0.0": "docker build . -t thoschu/chat:2.0.0",
+    "inspect": "docker image inspect thoschu/chat",
+    "publish": "docker image push --all-tags thoschu/chat",
+    "_chat": "docker run -d -p 3000:3000 --name chat -e ENVIRONMENT=$ENVIRONMENT -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
     "_tunnel": "npx ngrok http 3000 --authtoken $NGROK_AUTHTOKEN",
     "dotenv:chat": "dotenv -- npm run _chat",
     "dotenv:tunnel": "dotenv -- npm run _tunnel"
@@ -38,5 +46,8 @@
   },
   "devDependencies": {
     "dotenv-cli": "^7.3.0"
+  },
+  "optionalDependencies": {
+    "letter-count": "^5.2.1"
   }
 }

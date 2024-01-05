@@ -10,12 +10,14 @@ WORKDIR /usr/src/app
 COPY package.json /usr/src/app/
 RUN npm install
 
+# Install packages
+RUN apk add curl && apk add nano
+
 # Bundle app source
 COPY . /usr/src/app
 
 EXPOSE 3000
 
-#HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:3000 || exit 1
-HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
+HEALTHCHECK --interval=60s --timeout=60s --start-period=180s CMD curl --fail http://localhost:3000/ping || exit 1
 
-CMD ["npm","start"]
+CMD ["npm", "start"]

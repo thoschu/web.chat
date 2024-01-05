@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config();
 
 const axios = require('axios');
@@ -143,7 +145,7 @@ app.get('/bot', async (req, res) => {
     res.send(response);
 });
 
-app.get('/ping', async (_req, res) => {
+app.get('/ping', (_req, res) => {
     res.sendStatus(200);
 });
 
