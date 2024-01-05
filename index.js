@@ -7,6 +7,8 @@ const { join} = require('node:path');
 const { Server } = require('socket.io');
 const { OpenAI } = require('openai');
 const { createTransport } = require('nodemailer');
+const { from, first, of, map} = require('rxjs');
+const { head } = require('ramda');
 
 const PORT = 3000;
 const app = express();
@@ -31,14 +33,11 @@ const users = new Set();
 
 io.on('connection', async (socket) => {
     if (process.env.ENVIRONMENT !== 'development') {
-        try {
-            const response = await axios.get('http://localhost:3000/bot?message=\'a user connected\'');
-            const data = response.data;
+        const response = await getBotResponse(`a user connected`);
 
-            socket.broadcast.emit('info user', data.choices[0].message.content);
-        } catch (error) {
-            console.error(error);
-        }
+        emitBotMessage(response, (message) => {
+            socket.broadcast.emit('info user', message);
+        });
     }
 
     users.add(socket.id);
@@ -70,14 +69,11 @@ io.on('connection', async (socket) => {
         io.emit('users size', users.size);
 
         if (process.env.ENVIRONMENT !== 'development') {
-            try {
-                const response = await axios.get('http://localhost:3000/bot?message=\'a user disconnected\'');
-                const data = response.data;
+            const response = await getBotResponse(`a user disconnected`);
 
-                socket.broadcast.emit('info user', data.choices[0].message.content);
-            } catch (error) {
-                console.error(error);
-            }
+            emitBotMessage(response, (message) => {
+                socket.broadcast.emit('info user', message);
+            });
         } else {
             socket.broadcast.emit('info user', text);
         }
@@ -101,7 +97,7 @@ io.on('connection', async (socket) => {
                 if (error) {
                     console.log(error);
                 } else {
-                    console.log('Email sent: ' + info.response);
+                    console.log('email sent: ' + info.response);
                 }
             });
         }
@@ -109,14 +105,11 @@ io.on('connection', async (socket) => {
         const randomNumber = Math.floor(Math.random() * 4) + 1;
 
         if (process.env.ENVIRONMENT !== 'development' && randomNumber === 1) {
-            try {
-                const response = await axios.get(`http://localhost:3000/bot?message=${msg}`);
-                const data = response.data;
+            const response = await getBotResponse(msg);
 
-                io.emit('info user', data.choices[0].message.content);
-            } catch (error) {
-                console.error(error);
-            }
+            emitBotMessage(response, (message) => {
+                io.emit('info user', message);
+            });
         }
     });
 });
@@ -133,10 +126,10 @@ app.get('/bot', async (req, res) => {
             {
                 "role": "system",
                 "content": `
-                You are Tom, a chatbot who secretly listens to a conversation between 
-                chat participants and reluctantly makes sarcastic comments in German or english, depending on selected input.
-                You are not answering from the first person perspective and avoid the word chatbot, the AI must not feel addressed.
-            `
+                    You are Tom, a chatbot who secretly listens to a conversation between 
+                    chat participants and reluctantly makes sarcastic comments in German or english, depending on selected input.
+                    You are not answering from the first person perspective and avoid the word chatbot, the AI must not feel addressed.
+                `
             }, {
                 "role": "user",
                 "content": message
@@ -147,7 +140,6 @@ app.get('/bot', async (req, res) => {
         top_p: 1,
     });
 
-    // res.send(response.choices[0].message.content);
     res.send(response);
 });
 
@@ -160,12 +152,38 @@ app.get('/status', async (_req, res) => {
     const entries = [];
 
     for(let i= 0; i < users.size; i++) {
-        entries.push(itr.next().value[0]);
+        const result = itr.next();
+        const values = result.value;
+
+        from(values)
+            .pipe(first())
+            .subscribe((value) => {
+                entries.push(value);
+            });
     }
 
     res.send({ status: users.size, entries });
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is listening on http://localhost:${PORT}`);
+    console.log(`Server is listening on http://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
 });
+
+const emitBotMessage = (response, cb) => {
+    of(response)
+        .pipe(
+            map(obj => obj.data),
+            map(obj => obj.choices),
+            map(head),
+            map(obj => obj.message),
+            map(obj => obj.content)
+        ).subscribe(cb);
+};
+
+const getBotResponse = async (message) => {
+    try {
+        return await axios.get(`http://localhost:3000/bot?message=${message}`);
+    } catch (error) {
+        console.error(error);
+    }
+};
