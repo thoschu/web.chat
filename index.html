@@ -64,19 +64,6 @@
                 padding: 10px 0;
             }
 
-            .animate-move {
-                animation: moveDown 0.3s ease;
-            }
-
-            @keyframes moveDown {
-                from {
-                    transform: translateY(0);
-                }
-                to {
-                    transform: translateY(100%);
-                }
-            }
-
             #messages {
                 list-style-type: none;
                 margin: 0;
@@ -97,16 +84,20 @@
                 border: dotted #c3c3c3 1px;
             }
 
+            li.text-message {
+                min-height: 50px;
+            }
+
             li:nth-child(odd) {
                 border-right: 7px solid #c3c3c3;
             }
 
-            li:nth-child(4n+1), ul li:nth-child(4n+2) {
+            li:nth-child(4n+1), li:nth-child(4n+2) {
                 border-left: 7px solid #eaeaea;
                 background-color: #eaeaea;
             }
 
-            li:nth-child(4n+3), ul li:nth-child(4n+4) {
+            li:nth-child(4n+3), li:nth-child(4n+4) {
                 border-left: 7px solid #d7d7d7;
                 background-color: #d7d7d7;
             }
@@ -306,13 +297,26 @@
                 });
             });
 
-            socket.on('chat message', (chat) => {
+            socket.on('chat message', async (chat) => {
                 const messages = $('#messages');
                 const d = new Date();
                 const mathRandom = Math.random();
+                // const encoder = new TextEncoder();
+                // const data = encoder.encode(chat.id);
+                // const hash = await crypto.subtle.digest("SHA-256", data);
+                // console.log(hash);
 
-                messages.prepend($(`<li class="animate__animated animate__flipInX">`).text('👤 ' + chat.msg));
-                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${chat.id}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString() + ' │'));
+                async function digestMessage(message) {
+                    const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+                    const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+                    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+                    return hashArray
+                        .map((b) => b.toString(16).padStart(2, "0"))
+                        .join("");
+                }
+
+                messages.prepend($(`<li class="text-message animate__animated animate__flipInX">`).text('👤 ' + chat.msg));
+                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${await digestMessage(chat.id)}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString() + ' |'));
 
                 const measureText = context.measureText(chat.msg);
                 const textWidth = measureText.width;
