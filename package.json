@@ -11,7 +11,7 @@
     "logs": "docker logs chat",
     "test": "docker scout quickview",
     "build": "docker build . -t thoschu/chat",
-    "try": "docker run -d -p 80:3000 --name chat -e OPENAI_APIKEY='' thoschu/chat"
+    "try": "docker run -d -p 80:3000 --name chat -e OPENAI_APIKEY='xxx' thoschu/chat"
   },
   "repository": {
     "type": "git",
@@ -20,9 +20,9 @@
   "author": "Tom S.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/thoschu/de.schulte360.web.chat/issues"
+    "url": "https://github.com/thoschu/ch.techstack.web.chat/issues"
   },
-  "homepage": "https://github.com/thoschu/de.schulte360.web.chat#readme",
+  "homepage": "https://github.com/thoschu/ch.techstack.web.chat#readme",
   "dependencies": {
     "axios": "^1.6.3",
     "dotenv": "^16.3.1",
