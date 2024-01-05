@@ -1,10 +1,10 @@
 {
-  "name": "de.schulte360.web.chat",
-  "version": "1.0.0",
+  "name": "ch.techstack.web.chat",
+  "version": "2.0.0",
   "description": "socket.io app",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node --trace-deprecation index.js",
     "test": ""
   },
   "repository": {
@@ -18,13 +18,11 @@
   },
   "homepage": "https://github.com/thoschu/de.schulte360.web.chat#readme",
   "dependencies": {
-    "express": "4.10.2",
-    "js-csp": "^1.0.1",
-    "ramda": "^0.24.1",
-    "socket.io": "1.2.0"
-  },
-  "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-buddyjs": "^0.1.2"
+    "axios": "^1.6.3",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.8",
+    "openai": "^4.24.1",
+    "socket.io": "^4.7.2"
   }
 }

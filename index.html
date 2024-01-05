@@ -17,6 +17,30 @@
                 font: 13px Helvetica, Arial;
             }
 
+            header {
+                position: sticky;
+                top: 0;
+                background-color: white;
+                z-index: 10000000;
+            }
+
+            main, footer {
+                position: fixed;
+                width: inherit;
+            }
+
+            main {
+                top: 300px;
+                height: calc(100vh - 43%);
+                overflow-y: scroll;
+            }
+
+            footer {
+                bottom: 10px;
+                background-color: white;
+                z-index: 10000000;
+            }
+
             form {
                 background: white;
                 padding: 3px;
@@ -29,7 +53,7 @@
                 border: 1px solid #c3c3c3;
                 padding: 10px;
                 width: 100%;
-                margin-right: 0%;
+                margin-right: 0;
             }
 
             form button {
@@ -38,6 +62,19 @@
                 border-radius: 2px;
                 margin-top: 5px;
                 padding: 10px 0;
+            }
+
+            .animate-move {
+                animation: moveDown 0.3s ease;
+            }
+
+            @keyframes moveDown {
+                from {
+                    transform: translateY(0);
+                }
+                to {
+                    transform: translateY(100%);
+                }
             }
 
             #messages {
@@ -59,91 +96,211 @@
                 height: 50px;
                 border: dotted #c3c3c3 1px;
             }
+
+            li:nth-child(odd) {
+                border-right: 7px solid #c3c3c3;
+            }
+
+            li:nth-child(4n+1), ul li:nth-child(4n+2) {
+                border-left: 7px solid #eaeaea;
+                background-color: #eaeaea;
+            }
+
+            li:nth-child(4n+3), ul li:nth-child(4n+4) {
+                border-left: 7px solid #d7d7d7;
+                background-color: #d7d7d7;
+            }
         </style>
         <link rel="icon" href="//cdn1.iconfinder.com/data/icons/freeline/32/bubble_chat_comment_message_outline_talk-32.png" type="image/x-icon">
-        <link href="//fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet">
+        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans+Mono">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css" integrity="sha512-wJgJNTBBkLit7ymC6vvzM1EcSWeM9mmOu+1USHaRBbHkm6W9EgM0HY27+UtUaprntaYQJF75rc8gjxllKs5OIQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
         <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-            <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+            <script src="//oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+            <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
-        <script>
-            var _paq = _paq || [];
-            _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-            _paq.push(["setCookieDomain", "*.server360.io"]);
-            _paq.push(["setDomains", ["*.server360.io", "*.www.server360.io"]]);
-            _paq.push(['trackPageView']);
-            _paq.push(['enableLinkTracking']);
-            (function () {
-                var u = "//analytics.schulte360.de/";
-                _paq.push(['setTrackerUrl', u + 'piwik.php']);
-                _paq.push(['setSiteId', '4']);
-                var d = document, g = d.createElement('script'),
-                    s = d.getElementsByTagName('script')[0];
-                g.type = 'text/javascript';
-                g.async = true;
-                g.defer = true;
-                g.src = u + 'piwik.js';
-                s.parentNode.insertBefore(g, s);
-            })();
-        </script>
     </head>
     <body class="container">
-        <noscript class="row"><p class="col-md-12"><img class="img-fluid" src="//analytics.schulte360.de/piwik.php?idsite=4" style="border:0;" alt="" /></p></noscript>
         <header class="row">
-            <h2 class="col-md-12 text-center">Moin...</h2>
-            <h3 class="col-md-12 text-center">server360.io</h3>
-            <div class="col-md-12">
+            <h2 class="col-md-12 text-center animate__animated animate__lightSpeedInRight">Moin …</h2>
+            <h3 id="moin" class="col-md-12 text-center animate__animated animate__lightSpeedInLeft animate__delay-1s">∘ techstack.ch ∘ </h3>
+            <div class="col-md-12 animate__animated animate__fadeInDown animate__delay-2s animate__slow">
                 <canvas id="chatcanvas"></canvas>
             </div>
+            <form class="col-md-12 animate__animated animate__fadeInUp animate__delay-3s animate__slower" action="">
+                <label for="m"></label>
+                <input id="m" placeholder="Hier tippen..." autocomplete="off">
+                <button id="send_button" class="center-block" disabled>
+                    <i class="fa fa-comments-o fa-lg" aria-hidden="true"></i>
+                </button>
+            </form>
         </header>
         <main class="row">
             <div class="col-md-12">
                 <ul id="messages"></ul>
             </div>
-            <form class="col-md-12" action="">
-                <input id="m"  placeholder="Hier tippen..." autocomplete="off">
-                <button class="center-block">
-                    <i class="fa fa-comments-o fa-lg" aria-hidden="true"></i>
-                </button>
-            </form>
         </main>
-        <footer class="row">
-            <h6 class="col-md-12 text-center">&copy; by Tom S.</h6>
+        <footer class="row animate__animated animate__bounceIn animate__delay-4s">
+            <h6 class="col-md-12 text-center">&copy; by Tom S. - 2 0 2 4</h6>
         </footer>
-        <script src="//use.fontawesome.com/1c70b6a09c.js"></script>
+        <script src="//use.fontawesome.com/1c70b6a09c.js" crossorigin="anonymous"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.js" integrity="sha512-Y+cHVeYzi7pamIOGBwYHrynWWTKImI9G78i53+azDb1uPmU1Dz9/r2BLxGXWgOC7FhwAGsy3/9YpNYaoBy7Kzg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-        <script src="//code.jquery.com/jquery-1.11.1.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-        <script>
-            var canvas = document.getElementById('chatcanvas');
-            var context = canvas.getContext('2d');
-            var W, H;
+        <script type="importmap">
+            {
+              "imports": {
+                "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js"
+              }
+            }
+        </script>
+        <!-- analytics -->
+        <script type="module">
+            import { io } from 'socket.io-client';
+
+            const element = document.getElementById('moin');
+            const canvas = document.getElementById('chatcanvas');
+            const button = document.getElementById('send_button');
+            const input = document.getElementById('m');
+            let counter = 0;
+            let toast;
+
+            let context = canvas.getContext('2d');
+            let W, H;
+
             W = canvas.width = window.innerWidth;
             H = canvas.height = window.innerHeight
+
             context.font = '200px "Droid Sans Mono"';
 
-            var socket = io();
+            let socket = io();
 
-            $('form').submit(function () {
-                socket.emit('chat message', $('#m').val());
-                $('#m').val('');
+            $('form').submit(() => {
+                const input = $('#m');
+
+                socket.emit('chat message', input.val());
+
+                input.val('');
+
+                button.disabled = true;
+
+                element.classList.remove('animate__lightSpeedInLeft');
+                element.classList.remove('animate__pulse', 'animate__infinite')
+                element.classList.add('animate__pulse', 'animate__infinite');
+
                 return false;
             });
 
-            socket.on('chat message', function (msg) {
-                console.log(typeof msg);
-                var d = new Date();
-                $('#messages').prepend($('<li>').text(msg));
-                $('#messages').prepend($('<li>').text(d.toDateString() + ' - ' + d.toLocaleTimeString()));
+            socket.on('connect', () => {
+                const socketId = socket.id;
 
-                var textWidth = context.measureText(msg).width;
-                var random = Math.floor(Math.random() * W) + 1;
+                button.title = socketId;
 
-                context.fillStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
-                context.fillText('●', random, textWidth);
+                toast = $.toast({
+                    text: `
+                        ${socketId} <h3><b> 0 </b></h3>
+                    `,
+                    loader: false,
+                    loaderBg: 'grey',
+                    allowToastClose : true,
+                    hideAfter: false,
+                    position: 'top-left',
+                    bgColor: '#ccc',
+                    textColor: 'black',
+                    textAlign: 'center',
+                    beforeShow: () => {},
+                    afterShown: () => {},
+                    beforeHide: () => {},
+                    afterHidden: () => {}
+                });
+
+                // $.toast({
+                //     text: `
+                //         <video id="localVideo" data-socket-id="${socketId}" autoplay muted></video>
+                //     `,
+                //     loaderBg: 'grey',
+                //     showHideTransition: 'fade',
+                //     hideAfter: false,
+                //     bgColor: 'grey',
+                //     textColor: 'white',
+                //     textAlign: 'center',
+                //     beforeShow: () => {},
+                //     afterShown: (d) => {
+                //         console.log(d);
+                //         const localVideo = document.getElementById('localVideo');
+                //         console.log(localVideo);
+                //     },
+                //     beforeHide: () => {},
+                //     afterHidden: () => {}
+                // });
+            });
+
+            socket.on('user video', (id) => {
+                // $.toast({
+                //     text: `
+                //         <video id="remoteVideo" data-socket-id="${id}" autoplay></video>
+                //     `,
+                //     loaderBg: 'grey',
+                //     showHideTransition: 'fade',
+                //     hideAfter: false,
+                //     bgColor: 'grey',
+                //     textColor: 'white',
+                //     textAlign: 'center'
+                // });
+            });
+
+            socket.on('users size', (size) => {
+                const socketId = socket.id;
+
+                toast.update({
+                    text: `
+                        ${socketId} <h3 class="animate__animated animate__pulse animate__infinite animate__delay-1s animate__fast"><b> ${size} </b></h3>
+                    `,
+                });
+            });
+
+            socket.on('info user', (msg) => {
+                $.toast({
+                    text: `${msg}`,
+                    icon: 'info',
+                    loader: true,
+                    loaderBg: 'grey',
+                    showHideTransition: 'fade',
+                    position: 'top-right',
+                    hideAfter: 7000,
+                    bgColor: 'grey',
+                    textColor: 'white',
+                    textAlign: 'left'
+                });
+            });
+
+            socket.on('chat message', (chat) => {
+                const messages = $('#messages');
+                const d = new Date();
+                const mathRandom = Math.random();
+
+                messages.prepend($(`<li class="animate__animated animate__flipInX">`).text(chat.msg));
+                messages.prepend($(`<li class="animate__animated animate__slideInDown">`).text(d.toDateString() + ' - ' + d.toLocaleTimeString() + ' - ' + chat.id));
+
+                const measureText = context.measureText(chat.msg);
+                const textWidth = measureText.width;
+                const randomWidth = Math.floor(mathRandom * W);
+                const randomHeight = Math.floor(mathRandom * H);
+                const gray = Math.floor(Math.random() * 256);
+                let hex = gray.toString(16);
+
+                if (hex.length === 1) {
+                    hex = '0' + hex;
+                }
+
+                context.fillStyle = '#' + hex + hex + hex;
+                context.fillText(String(++counter), randomWidth, randomHeight, textWidth);
+            });
+
+            input.addEventListener('input', (event) => {
+                button.disabled = !event.data;
             });
         </script>
     </body>

@@ -1,10 +1,9 @@
 # comment
 */node_modules*
-*/*/node_modules*
 node_modules?
-node_modules
 npm-debug.log*
-de.treu.rtl.stadtlandfluss.backend.socketApp.iml
+ch.techstack.socketApp.iml
 .idea
 spec
 public/test
+.env
