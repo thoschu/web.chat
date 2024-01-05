@@ -1,9 +1,6 @@
-FROM node:onbuild
+FROM node:18-alpine
 
 MAINTAINER <Tom S. | thoschulte@gmail.com>
-
-RUN apt-get update
-RUN apt-get -y upgrade
 
 # Create app directory
 RUN mkdir -p /usr/src/app
@@ -17,5 +14,8 @@ RUN npm install
 COPY . /usr/src/app
 
 EXPOSE 3000
+
+#HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:3000 || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
 
 CMD ["npm","start"]

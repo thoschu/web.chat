@@ -110,6 +110,11 @@
                 border-left: 7px solid #d7d7d7;
                 background-color: #d7d7d7;
             }
+
+            li[data-user-id]:hover::after {
+                content: " 👤 "attr(data-user-id)"";
+                margin-left: 5px;
+            }
         </style>
         <link rel="icon" href="//cdn1.iconfinder.com/data/icons/freeline/32/bubble_chat_comment_message_outline_talk-32.png" type="image/x-icon">
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans+Mono">
@@ -256,7 +261,7 @@
 
                 toast.update({
                     text: `
-                        ${socketId} <h3 class="animate__animated animate__pulse animate__infinite animate__delay-1s animate__fast"><b> ${size} </b></h3>
+                        ${socketId} <h3 class="animate__animated animate__flash animate__delay-1s"><b> ${size} </b></h3>
                     `,
                 });
             });
@@ -281,8 +286,8 @@
                 const d = new Date();
                 const mathRandom = Math.random();
 
-                messages.prepend($(`<li class="animate__animated animate__flipInX">`).text(chat.msg));
-                messages.prepend($(`<li class="animate__animated animate__slideInDown">`).text(d.toDateString() + ' - ' + d.toLocaleTimeString() + ' - ' + chat.id));
+                messages.prepend($(`<li class="animate__animated animate__flipInX">`).text('' + chat.msg));
+                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${chat.id}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString()));
 
                 const measureText = context.measureText(chat.msg);
                 const textWidth = measureText.width;

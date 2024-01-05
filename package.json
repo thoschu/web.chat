@@ -1,11 +1,17 @@
 {
   "name": "ch.techstack.web.chat",
   "version": "2.0.0",
-  "description": "socket.io app",
+  "description": "socket.io chat app with openai bot",
   "main": "index.js",
   "scripts": {
     "start": "node --trace-deprecation index.js",
-    "test": ""
+    "ps": "docker ps -a",
+    "stop": "docker stop chat",
+    "rm": "docker rm chat",
+    "logs": "docker logs chat",
+    "test": "docker scout quickview",
+    "build": "docker build . -t thoschu/chat",
+    "try": "docker run -d -p 80:3000 --name chat -e OPENAI_APIKEY='' thoschu/chat"
   },
   "repository": {
     "type": "git",
