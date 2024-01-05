@@ -112,10 +112,33 @@
             }
 
             li[data-user-id]::after {
-                content: "⏵ "attr(data-user-id)"";
+                content: " "attr(data-user-id)" ";
                 margin-left: 5px;
                 font-weight: bold;
                 font-variant-caps: normal;
+            }
+
+            li:not(:first-child)[data-user-id]::after {
+                animation: changeColor 3s linear forwards;
+            }
+
+            li:not(:first-child)[data-user-id]:hover::after {
+                color: grey !important;
+            }
+
+            @keyframes changeColor {
+                0% {
+                    content: " "attr(data-user-id)" ";
+                    color: inherit;
+                }
+                50% {
+                    content: " "attr(data-user-id)" ";
+                    color: transparent;
+                }
+                100% {
+                    content: " "attr(data-user-id)" ";
+                    color: darkgrey;
+                }
             }
         </style>
         <link rel="icon" href="//cdn1.iconfinder.com/data/icons/freeline/32/bubble_chat_comment_message_outline_talk-32.png" type="image/x-icon">
@@ -194,8 +217,8 @@
                 button.disabled = true;
 
                 element.classList.remove('animate__lightSpeedInLeft');
-                element.classList.remove('animate__pulse', 'animate__infinite')
-                element.classList.add('animate__pulse', 'animate__infinite');
+                element.classList.remove('animate__pulse', 'animate__infinite', 'animate__slow')
+                element.classList.add('animate__pulse', 'animate__infinite', 'animate__slow');
 
                 return false;
             });
@@ -289,7 +312,7 @@
                 const mathRandom = Math.random();
 
                 messages.prepend($(`<li class="animate__animated animate__flipInX">`).text('👤 ' + chat.msg));
-                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${chat.id}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString()));
+                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${chat.id}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString() + ' │'));
 
                 const measureText = context.measureText(chat.msg);
                 const textWidth = measureText.width;
