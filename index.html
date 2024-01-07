@@ -244,7 +244,6 @@
                     }
                 ]
             };
-            const peerConnection = new RTCPeerConnection(configuration);
 
             let socket = io();
 
@@ -285,7 +284,13 @@
             });
 
             socket.on('disconnect user', (id) => {
-                const toast = document.getElementById(`${id}`);
+                let toast = document.getElementById(`${id}`);
+
+                iziToast.hide({
+                    transitionOut: 'fadeOutDown'
+                }, toast);
+
+                toast = document.getElementById(`${socket.id}`);
 
                 iziToast.hide({
                     transitionOut: 'fadeOutDown'
@@ -316,118 +321,120 @@
                     beforeHide: () => {},
                     afterHidden: () => {}
                 });
-
-                iziToast.show({
-                    id: socket.id,
-                    class: '',
-                    title: '',
-                    titleColor: '',
-                    titleSize: '',
-                    titleLineHeight: '',
-                    message: `
-                    <video autoplay muted id="local-video" width="300" height="auto">
-                        <!--
-                        <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
-                        <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
-                        -->
-                        Your browser does not support the video tag.
-                    </video>
-                `,
-                    messageColor: '',
-                    messageSize: '',
-                    messageLineHeight: '',
-                    backgroundColor: 'transparent',
-                    theme: null,
-                    color: '',
-                    icon: '',
-                    iconText: '',
-                    iconColor: '',
-                    iconUrl: null,
-                    image: '',
-                    imageWidth: 0,
-                    maxWidth: null,
-                    zindex: null,
-                    layout: 1,
-                    balloon: false,
-                    close: false,
-                    closeOnEscape: false,
-                    closeOnClick: false,
-                    displayMode: 0,
-                    position: 'topRight',
-                    target: '',
-                    targetFirst: true,
-                    timeout: null,
-                    rtl: false,
-                    animateInside: true,
-                    drag: false,
-                    pauseOnHover: true,
-                    resetOnHover: false,
-                    progressBar: false,
-                    progressBarColor: '',
-                    progressBarEasing: 'linear',
-                    overlay: false,
-                    overlayClose: false,
-                    overlayColor: 'rgba(0, 0, 0, 0.6)',
-                    transitionIn: 'fadeInUp',
-                    transitionOut: 'fadeOut',
-                    transitionInMobile: 'fadeInUp',
-                    transitionOutMobile: 'fadeOutDown',
-                    buttons: {},
-                    inputs: {},
-                    onOpening: () => {},
-                    onOpened: (_element) => {
-                        const localVideo = document.getElementById("local-video");
-
-                        if (navigator.mediaDevices.getUserMedia) {
-                            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                                .then((stream) => {
-                                    localVideo.srcObject = stream;
-
-                                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-
-                                    peerConnection.onicecandidate = event => {
-                                        if (event.candidate) {
-                                            socket.emit('signal', {'candidate': event.candidate});
-                                        }
-                                    };
-
-                                    socket.on('signal', data => {
-                                        if (data.candidate) {
-                                            peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                                        } else if (data.sdp) {
-                                            const desc = new RTCSessionDescription(data.sdp);
-
-                                            peerConnection.setRemoteDescription(desc).then(() => {
-                                                if (desc.type === 'offer') {
-                                                    peerConnection.createAnswer().then(answer => {
-                                                        peerConnection.setLocalDescription(answer);
-
-                                                        socket.emit('signal', {'sdp': answer});
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    });
-
-                                    peerConnection.createOffer()
-                                        .then(offer => peerConnection.setLocalDescription(offer))
-                                        .then(() => {
-                                            socket.emit('signal', {'sdp': peerConnection.localDescription});
-                                        });
-
-                                })
-                                .catch((error) => {
-                                    console.error(error);
-                                });
-                        }
-                    },
-                    onClosing:  () => {},
-                    onClosed:  () => {}
-                });
             });
 
             socket.on('new user', (newId, emit = true) => {
                 if(newId !== socket.id) {
+                    const peerConnection = new RTCPeerConnection(configuration);
+
+                    iziToast.show({
+                        id: socket.id,
+                        class: '',
+                        title: '',
+                        titleColor: '',
+                        titleSize: '',
+                        titleLineHeight: '',
+                        message: `
+                            <video autoplay muted id="local-video" width="300" height="auto">
+                                <!--
+                                <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
+                                <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
+                                -->
+                                Your browser does not support the video tag.
+                            </video>
+                        `,
+                        messageColor: '',
+                        messageSize: '',
+                        messageLineHeight: '',
+                        backgroundColor: 'transparent',
+                        theme: null,
+                        color: '',
+                        icon: '',
+                        iconText: '',
+                        iconColor: '',
+                        iconUrl: null,
+                        image: '',
+                        imageWidth: 0,
+                        maxWidth: null,
+                        zindex: null,
+                        layout: 1,
+                        balloon: false,
+                        close: false,
+                        closeOnEscape: false,
+                        closeOnClick: false,
+                        displayMode: 0,
+                        position: 'topRight',
+                        target: '',
+                        targetFirst: true,
+                        timeout: null,
+                        rtl: false,
+                        animateInside: true,
+                        drag: false,
+                        pauseOnHover: true,
+                        resetOnHover: false,
+                        progressBar: false,
+                        progressBarColor: '',
+                        progressBarEasing: 'linear',
+                        overlay: false,
+                        overlayClose: false,
+                        overlayColor: 'rgba(0, 0, 0, 0.6)',
+                        transitionIn: 'fadeInUp',
+                        transitionOut: 'fadeOut',
+                        transitionInMobile: 'fadeInUp',
+                        transitionOutMobile: 'fadeOutDown',
+                        buttons: {},
+                        inputs: {},
+                        onOpening: () => {},
+                        onOpened: (_element) => {
+                            const localVideo = document.getElementById("local-video");
+
+                            if (navigator.mediaDevices.getUserMedia) {
+                                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                                    .then((stream) => {
+                                        localVideo.srcObject = stream;
+
+                                        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+                                        peerConnection.onicecandidate = event => {
+                                            if (event.candidate) {
+                                                socket.emit('signal', {'candidate': event.candidate});
+                                            }
+                                        };
+
+                                        socket.on('signal', data => {
+                                            if (data.candidate) {
+                                                peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                                            } else if (data.sdp) {
+                                                const desc = new RTCSessionDescription(data.sdp);
+
+                                                peerConnection.setRemoteDescription(desc).then(() => {
+                                                    if (desc.type === 'offer') {
+                                                        peerConnection.createAnswer().then(answer => {
+                                                            peerConnection.setLocalDescription(answer);
+
+                                                            socket.emit('signal', {'sdp': answer});
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        peerConnection.createOffer()
+                                            .then(offer => peerConnection.setLocalDescription(offer))
+                                            .then(() => {
+                                                socket.emit('signal', {'sdp': peerConnection.localDescription});
+                                            });
+
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                    });
+                            }
+                        },
+                        onClosing:  () => {},
+                        onClosed:  () => {}
+                    });
+
                     iziToast.show({
                         id: newId,
                         message: `
@@ -484,11 +491,6 @@
                         onClosed:  () => {}
                     });
                 }
-            });
-
-            socket.on('full', () => {
-                const socketId = socket.id;
-
             });
 
             socket.on('users size', (size) => {
