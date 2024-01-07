@@ -2,6 +2,8 @@
 
 require('dotenv').config();
 
+const fs = require('fs');
+const https = require('https');
 const axios = require('axios');
 const express = require('express');
 const { createServer} = require('node:http');
@@ -11,10 +13,14 @@ const { OpenAI } = require('openai');
 const { createTransport } = require('nodemailer');
 const { from, first, of, map} = require('rxjs');
 const { head } = require('ramda');
+const { v4: uuidv4 } = require('uuid');
 
 const PORT = 3000;
+const key = fs.readFileSync("./mkcert/localhost-key.pem", "utf-8");
+const cert = fs.readFileSync("./mkcert/localhost.pem", "utf-8");
 const app = express();
-const server = createServer(app);
+const server = https.createServer({ key, cert }, app);
+// const server = createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_APIKEY
@@ -46,22 +52,15 @@ io.on('connection', async (socket) => {
 
     io.emit('users size', users.size);
 
-    socket.broadcast.emit('user video', socket.id);
+    socket.broadcast.emit('new user', socket.id);
 
-    // ToDo -----------------------------------------------------
-    socket.on('offer', (offer, room) => {
-        socket.join(room);
-        socket.to(room).emit('offer', offer);
+    socket.on('signal', (data) => {
+        socket.broadcast.emit('signal', data);
     });
 
-    socket.on('answer', (answer, room) => {
-        socket.to(room).emit('answer', answer);
+    socket.on('update', ({from, to}) => {
+        io.to(to).emit('new user', from, false);
     });
-
-    socket.on('candidate', (candidate, room) => {
-        socket.to(room).emit('candidate', candidate);
-    });
-    // ----------------------------------------------------------
 
     socket.on('disconnect', async (reason) => {
         const text = `user ${socket.id} disconnected due to: ${reason}`;
@@ -80,7 +79,7 @@ io.on('connection', async (socket) => {
             socket.broadcast.emit('info user', text);
         }
 
-        console.log(text);
+        io.emit('disconnect user', socket.id);
     });
 
     socket.on('chat message', async (msg) => {
@@ -117,11 +116,19 @@ io.on('connection', async (socket) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, 'index.html'));
+    res.redirect(`/${uuidv4()}`);
+});
+
+app.get('/:room', (req, res) => {
+    if(users.size > 1) {
+        res.sendStatus(405);
+    } else {
+        res.sendFile(join(__dirname, 'index.html'));
+    }
 });
 
 app.get('/bot', async (req, res) => {
-    const message = req.query.message ?? 'Hi';
+    const message = req.query.message ?? 'Hallo, moin und guten Tag!';
     const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
@@ -168,7 +175,9 @@ app.get('/status', async (_req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is listening on http://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
+    const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'https';
+
+    console.log(`Server is listening on ${protocol}://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
 });
 
 const emitBotMessage = (response, cb) => {

@@ -17,6 +17,12 @@
                 font: 13px Helvetica, Arial;
             }
 
+            .container {
+                width: 60% !important;
+                margin: 0;
+                padding: 0;
+            }
+
             header {
                 position: sticky;
                 top: 0;
@@ -131,6 +137,10 @@
                     color: darkgrey;
                 }
             }
+
+            .jq-toast-wrap {
+                min-width: 18vw;
+            }
         </style>
         <link rel="icon" href="//cdn1.iconfinder.com/data/icons/freeline/32/bubble_chat_comment_message_outline_talk-32.png" type="image/x-icon">
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans+Mono">
@@ -138,6 +148,7 @@
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw==" crossorigin="anonymous" referrerpolicy="no-referrer">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css">
         <!--[if lt IE 9]>
             <script src="//oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
             <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -146,14 +157,14 @@
     <body class="container">
         <header class="row">
             <h2 class="col-md-12 text-center animate__animated animate__lightSpeedInRight">Moin …</h2>
-            <h3 id="moin" class="col-md-12 text-center animate__animated animate__lightSpeedInLeft animate__delay-1s">∘ techstack.ch ∘ </h3>
+            <h3 id="moin" class="col-md-12 text-center animate__animated animate__lightSpeedInLeft animate__delay-1s">∘techstack.ch∘ </h3>
             <div class="col-md-12 animate__animated animate__fadeInDown animate__delay-2s animate__slow">
                 <canvas id="chatcanvas"></canvas>
             </div>
-            <form class="col-md-12 animate__animated animate__fadeInUp animate__delay-3s animate__slower" action="">
+            <form class="col-md-12 animate__animated animate__fadeInUp animate__delay-3s animate__slower">
                 <label for="m"></label>
                 <input id="m" placeholder="Hier tippen..." autocomplete="off">
-                <button id="send_button" class="center-block" disabled>
+                <button id="send_button" class="center-block" type="button" disabled>
                     <i class="fa fa-comments-o fa-lg" aria-hidden="true"></i>
                 </button>
             </form>
@@ -166,15 +177,16 @@
         <footer class="row animate__animated animate__bounceIn animate__delay-4s">
             <h6 class="col-md-12 text-center">&copy; by Tom S. - 2 0 2 4</h6>
         </footer>
-        <script src="//use.fontawesome.com/1c70b6a09c.js" crossorigin="anonymous"></script>
+        <script src="//use.fontawesome.com/1c70b6a09c.js" type="text/javascript" crossorigin="anonymous"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.js" integrity="sha512-Y+cHVeYzi7pamIOGBwYHrynWWTKImI9G78i53+azDb1uPmU1Dz9/r2BLxGXWgOC7FhwAGsy3/9YpNYaoBy7Kzg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="//cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
         <script type="importmap">
             {
-              "imports": {
-                "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js"
-              }
+                "imports": {
+                    "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js"
+                }
             }
         </script>
         <!-- analytics -->
@@ -185,20 +197,60 @@
             const canvas = document.getElementById('chatcanvas');
             const button = document.getElementById('send_button');
             const input = document.getElementById('m');
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             let counter = 0;
             let toast;
 
             let context = canvas.getContext('2d');
             let W, H;
 
+            const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+
+            if (isMobile) {
+                // window.location.href = '//techstack.ch/snake/';
+            }
+
             W = canvas.width = window.innerWidth;
-            H = canvas.height = window.innerHeight
+            H = canvas.height = window.innerHeight;
 
             context.font = '200px "Droid Sans Mono"';
 
+            console.info(userAgent);
+
+            const configuration = {
+                'iceServers': [
+                    {
+                        'urls': [
+                            'stun:stun.l.google.com:19302',
+                            // 'stun:stun1.l.google.com:19302',
+                            // 'stun:stun2.l.google.com:19302',
+                            // 'stun:stun3.l.google.com:19302',
+                            // 'stun:stun4.l.google.com:19302',
+                            // 'stun:stun01.sipphone.com',
+                            // 'stun:stun.ekiga.net',
+                            // 'stun:stun.fwdnet.net',
+                            // 'stun:stun.ideasip.com',
+                            // 'stun:stun.iptel.org',
+                            // 'stun:stun.rixtelecom.se',
+                            // 'stun:stun.schlund.de',
+                            // 'stun:stunserver.org',
+                            // 'stun:stun.softjoys.com',
+                            // 'stun:stun.voiparound.com',
+                            // 'stun:stun.voipbuster.com',
+                            // 'stun:stun.voipstunt.com',
+                            // 'stun:stun.voxgratia.org',
+                            'stun:stun.xten.com'
+                        ]
+                    }
+                ]
+            };
+            const peerConnection = new RTCPeerConnection(configuration);
+
             let socket = io();
 
-            $('form').submit(() => {
+            button.addEventListener('touchstart', (event) => {
+                event.preventDefault();
+
                 const input = $('#m');
 
                 socket.emit('chat message', input.val());
@@ -214,6 +266,32 @@
                 return false;
             });
 
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+
+                const input = $('#m');
+
+                socket.emit('chat message', input.val());
+
+                input.val('');
+
+                button.disabled = true;
+
+                element.classList.remove('animate__lightSpeedInLeft');
+                element.classList.remove('animate__pulse', 'animate__infinite', 'animate__slow')
+                element.classList.add('animate__pulse', 'animate__infinite', 'animate__slow');
+
+                return false;
+            });
+
+            socket.on('disconnect user', (id) => {
+                const toast = document.getElementById(`${id}`);
+
+                iziToast.hide({
+                    transitionOut: 'fadeOutDown'
+                }, toast);
+            });
+
             socket.on('connect', () => {
                 const socketId = socket.id;
 
@@ -221,7 +299,9 @@
 
                 toast = $.toast({
                     text: `
-                        ${socketId} <h3><b> 0 </b></h3>
+                        <p>
+                            ${socketId} <h3><b> 0 </b></h3>
+                        </p>
                     `,
                     loader: false,
                     loaderBg: 'grey',
@@ -237,39 +317,178 @@
                     afterHidden: () => {}
                 });
 
-                // $.toast({
-                //     text: `
-                //         <video id="localVideo" data-socket-id="${socketId}" autoplay muted></video>
-                //     `,
-                //     loaderBg: 'grey',
-                //     showHideTransition: 'fade',
-                //     hideAfter: false,
-                //     bgColor: 'grey',
-                //     textColor: 'white',
-                //     textAlign: 'center',
-                //     beforeShow: () => {},
-                //     afterShown: (d) => {
-                //         console.log(d);
-                //         const localVideo = document.getElementById('localVideo');
-                //         console.log(localVideo);
-                //     },
-                //     beforeHide: () => {},
-                //     afterHidden: () => {}
-                // });
+                iziToast.show({
+                    id: socket.id,
+                    class: '',
+                    title: '',
+                    titleColor: '',
+                    titleSize: '',
+                    titleLineHeight: '',
+                    message: `
+                    <video autoplay muted id="local-video" width="300" height="auto">
+                        <!--
+                        <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
+                        <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
+                        -->
+                        Your browser does not support the video tag.
+                    </video>
+                `,
+                    messageColor: '',
+                    messageSize: '',
+                    messageLineHeight: '',
+                    backgroundColor: 'transparent',
+                    theme: null,
+                    color: '',
+                    icon: '',
+                    iconText: '',
+                    iconColor: '',
+                    iconUrl: null,
+                    image: '',
+                    imageWidth: 0,
+                    maxWidth: null,
+                    zindex: null,
+                    layout: 1,
+                    balloon: false,
+                    close: false,
+                    closeOnEscape: false,
+                    closeOnClick: false,
+                    displayMode: 0,
+                    position: 'topRight',
+                    target: '',
+                    targetFirst: true,
+                    timeout: null,
+                    rtl: false,
+                    animateInside: true,
+                    drag: false,
+                    pauseOnHover: true,
+                    resetOnHover: false,
+                    progressBar: false,
+                    progressBarColor: '',
+                    progressBarEasing: 'linear',
+                    overlay: false,
+                    overlayClose: false,
+                    overlayColor: 'rgba(0, 0, 0, 0.6)',
+                    transitionIn: 'fadeInUp',
+                    transitionOut: 'fadeOut',
+                    transitionInMobile: 'fadeInUp',
+                    transitionOutMobile: 'fadeOutDown',
+                    buttons: {},
+                    inputs: {},
+                    onOpening: () => {},
+                    onOpened: (_element) => {
+                        const localVideo = document.getElementById("local-video");
+
+                        if (navigator.mediaDevices.getUserMedia) {
+                            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                                .then((stream) => {
+                                    localVideo.srcObject = stream;
+
+                                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+                                    peerConnection.onicecandidate = event => {
+                                        if (event.candidate) {
+                                            socket.emit('signal', {'candidate': event.candidate});
+                                        }
+                                    };
+
+                                    socket.on('signal', data => {
+                                        if (data.candidate) {
+                                            peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                                        } else if (data.sdp) {
+                                            const desc = new RTCSessionDescription(data.sdp);
+
+                                            peerConnection.setRemoteDescription(desc).then(() => {
+                                                if (desc.type === 'offer') {
+                                                    peerConnection.createAnswer().then(answer => {
+                                                        peerConnection.setLocalDescription(answer);
+
+                                                        socket.emit('signal', {'sdp': answer});
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+
+                                    peerConnection.createOffer()
+                                        .then(offer => peerConnection.setLocalDescription(offer))
+                                        .then(() => {
+                                            socket.emit('signal', {'sdp': peerConnection.localDescription});
+                                        });
+
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+                        }
+                    },
+                    onClosing:  () => {},
+                    onClosed:  () => {}
+                });
             });
 
-            socket.on('user video', (id) => {
-                // $.toast({
-                //     text: `
-                //         <video id="remoteVideo" data-socket-id="${id}" autoplay></video>
-                //     `,
-                //     loaderBg: 'grey',
-                //     showHideTransition: 'fade',
-                //     hideAfter: false,
-                //     bgColor: 'grey',
-                //     textColor: 'white',
-                //     textAlign: 'center'
-                // });
+            socket.on('new user', (newId, emit = true) => {
+                if(newId !== socket.id) {
+                    iziToast.show({
+                        id: newId,
+                        message: `
+                            <video autoplay id="remote-video-${newId}" width="300" height="auto">
+                                Your browser does not support the video tag.
+                            </video>
+                        `,
+                        color: 'grey',
+                        layout: 1,
+                        balloon: false,
+                        close: false,
+                        closeOnEscape: false,
+                        closeOnClick: false,
+                        displayMode: 0,
+                        position: 'bottomRight',
+                        target: '',
+                        targetFirst: true,
+                        timeout: null,
+                        rtl: false,
+                        animateInside: true,
+                        drag: false,
+                        pauseOnHover: true,
+                        resetOnHover: false,
+                        progressBar: false,
+                        progressBarEasing: 'linear',
+                        overlay: false,
+                        overlayClose: false,
+                        overlayColor: 'rgba(0, 0, 0, 0.6)',
+                        transitionIn: 'fadeInUp',
+                        transitionOut: 'fadeOut',
+                        transitionInMobile: 'fadeInUp',
+                        transitionOutMobile: 'fadeOutDown',
+                        buttons: {},
+                        inputs: {},
+                        onOpening: () => {
+                            const remoteVideo = document.getElementById(`remote-video-${newId}`);
+
+                            if (navigator.mediaDevices.getUserMedia) {
+                                peerConnection.ontrack = event => {
+                                    remoteVideo.srcObject = event.streams[0];
+                                };
+                            }
+                        },
+                        onOpened: (_element) => {
+                            if(emit) {
+                                socket.emit('update', {
+                                    from: socket.id,
+                                    to: newId
+                                });
+                            }
+
+                        },
+                        onClosing:  () => {},
+                        onClosed:  () => {}
+                    });
+                }
+            });
+
+            socket.on('full', () => {
+                const socketId = socket.id;
+
             });
 
             socket.on('users size', (size) => {
@@ -277,8 +496,14 @@
 
                 toast.update({
                     text: `
-                        ${socketId} <h3 class="animate__animated animate__flash animate__delay-1s"><b> ${size} </b></h3>
+                        <p>
+                            ${socketId} <h3 class="animate__animated animate__flash animate__delay-1s"><b> ${size} </b></h3>
+                        </p>
                     `,
+                    beforeShow: () => {},
+                    afterShown: () => {},
+                    beforeHide: () => {},
+                    afterHidden: () => {}
                 });
             });
 
@@ -301,22 +526,13 @@
                 const messages = $('#messages');
                 const d = new Date();
                 const mathRandom = Math.random();
-                // const encoder = new TextEncoder();
-                // const data = encoder.encode(chat.id);
-                // const hash = await crypto.subtle.digest("SHA-256", data);
-                // console.log(hash);
-
-                async function digestMessage(message) {
-                    const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
-                    const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8); // hash the message
-                    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
-                    return hashArray
-                        .map((b) => b.toString(16).padStart(2, "0"))
-                        .join("");
-                }
+                const msgUint8 = new TextEncoder().encode(chat.id);
+                const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const digestId = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
                 messages.prepend($(`<li class="text-message animate__animated animate__flipInX">`).text('👤 ' + chat.msg));
-                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${await digestMessage(chat.id)}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString() + ' |'));
+                messages.prepend($(`<li class="animate__animated animate__slideInDown" data-user-id="${digestId}">`).text(d.toDateString() + ' ⟡ ' + d.toLocaleTimeString() + ' |'));
 
                 const measureText = context.measureText(chat.msg);
                 const textWidth = measureText.width;

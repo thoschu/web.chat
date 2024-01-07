@@ -19,8 +19,8 @@
     "build:arm64:2.0.0": "docker build . -t thoschu/chat:2.0.0",
     "inspect": "docker image inspect thoschu/chat",
     "publish": "docker image push --all-tags thoschu/chat",
-    "_chat": "docker run -d -p 3000:3000 --name chat -e ENVIRONMENT=$ENVIRONMENT -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
-    "_tunnel": "npx ngrok http 3000 --authtoken $NGROK_AUTHTOKEN",
+    "_chat": "docker run -d -p 3003:3000 --name chat -e ENVIRONMENT=$ENVIRONMENT -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
+    "_tunnel": "npx ngrok http https://localhost:3000 --authtoken $NGROK_AUTHTOKEN",
     "dotenv:chat": "dotenv -- npm run _chat",
     "dotenv:tunnel": "dotenv -- npm run _tunnel"
   },
@@ -42,7 +42,8 @@
     "openai": "^4.24.1",
     "ramda": "^0.29.1",
     "rxjs": "^7.8.1",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "dotenv-cli": "^7.3.0"
