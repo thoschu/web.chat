@@ -12,17 +12,18 @@
     "test": "docker scout quickview",
     "build": "npm run build:amd64 && npm run build:arm64",
     "build:amd64": "npm run build:amd64:3.0.1 && npm run build:amd64:latest",
-    "build:amd64:latest": "docker buildx build --platform=linux/amd64 -t thoschu/chat .",
-    "build:amd64:3.0.1": "docker buildx build --platform=linux/amd64  -t thoschu/chat:3.0.1 .",
+    "build:amd64:latest": "docker buildx build --platform=linux/amd64 -t thoschu/chat:latest-amd64 .",
+    "build:amd64:3.0.1": "docker buildx build --platform=linux/amd64  -t thoschu/chat:3.0.1-amd64 .",
     "build:arm64": "npm run build:arm64:3.0.1 && npm run build:arm64:latest",
-    "build:arm64:latest": "docker build . -t thoschu/chat",
-    "build:arm64:3.0.1": "docker build . -t thoschu/chat:3.0.1",
+    "build:arm64:latest": "docker build . -t thoschu/chat:latest-arm64 && docker build . -t thoschu/chat",
+    "build:arm64:3.0.1": "docker build . -t thoschu/chat:3.0.1-arm64",
     "inspect": "docker image inspect thoschu/chat",
     "publish": "docker image push --all-tags thoschu/chat",
-    "_chat": "docker run -d -p 3003:3000 --name chat -e ENVIRONMENT=$ENVIRONMENT -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
-    "_tunnel": "npx ngrok http https://localhost:3000 --authtoken $NGROK_AUTHTOKEN",
+    "_chat": "docker run -p 3000:3000 --name chat -e ENVIRONMENT=$ENVIRONMENT -e OPENAI_APIKEY=$OPENAI_APIKEY thoschu/chat",
+    "_tunnel": "npx ngrok http 3000 --authtoken $NGROK_AUTHTOKEN",
+    "_tunnel:tls": "npx ngrok http https://localhost:3000 --authtoken $NGROK_AUTHTOKEN",
     "dotenv:chat": "dotenv -- npm run _chat",
-    "dotenv:tunnel": "dotenv -- npm run _tunnel"
+    "dotenv:tunnel:tls": "dotenv -- npm run _tunnel"
   },
   "repository": {
     "type": "git",
@@ -43,7 +44,8 @@
     "ramda": "^0.29.1",
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.2",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "dotenv-cli": "^7.3.0"

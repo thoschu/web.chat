@@ -14,16 +14,32 @@ const { createTransport } = require('nodemailer');
 const { from, first, of, map} = require('rxjs');
 const { head } = require('ramda');
 const { v4: uuidv4 } = require('uuid');
+const winston = require("winston");
 
 const PORT = 3000;
 const key = fs.readFileSync("./mkcert/localhost-key.pem", "utf-8");
 const cert = fs.readFileSync("./mkcert/localhost.pem", "utf-8");
 const app = express();
 const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'http';
-const server = protocol === 'development' ? https.createServer({ key, cert }, app) : createServer(app);
+const server = protocol === 'https' ? https.createServer({ key, cert }, app) : createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_APIKEY
+});
+
+const logger = winston.createLogger({
+    level: "info",
+    format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        winston.format.printf(
+            (info) => `${info.timestamp} ${info.level}: ${info.message}`
+        )
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: "logs/app.log" }),
+    ],
 });
 
 const transporter = createTransport({
@@ -92,13 +108,12 @@ io.on('connection', async (socket) => {
 
         io.emit('chat message', {msg, id: socket.id});
 
-
         if (process.env.ENVIRONMENT !== 'development') {
             await transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.log(error);
+                    logger.error(error);
                 } else {
-                    console.log('email sent: ' + info.response);
+                    logger.info('email sent: ' + info.response);
                 }
             });
         }
@@ -116,7 +131,7 @@ io.on('connection', async (socket) => {
 });
 
 app.get('/', (req, res) => {
-    res.redirect(`/${uuidv4()}`);
+    res.redirect(`/${uuidv4(null, null, null)}`);
 });
 
 app.get('/:room', (req, res) => {
@@ -175,7 +190,7 @@ app.get('/status', async (_req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is listening on ${protocol}://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
+    logger.info(`Server is listening on ${protocol}://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
 });
 
 const emitBotMessage = (response, cb) => {
@@ -193,6 +208,6 @@ const getBotResponse = async (message) => {
     try {
         return await axios.get(`http://localhost:3000/bot?message=${message}`);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
     }
 };
