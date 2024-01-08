@@ -19,8 +19,8 @@ const PORT = 3000;
 const key = fs.readFileSync("./mkcert/localhost-key.pem", "utf-8");
 const cert = fs.readFileSync("./mkcert/localhost.pem", "utf-8");
 const app = express();
-const server = https.createServer({ key, cert }, app);
-// const server = createServer(app);
+const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'http';
+const server = protocol === 'development' ? https.createServer({ key, cert }, app) : createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_APIKEY
@@ -175,8 +175,6 @@ app.get('/status', async (_req, res) => {
 });
 
 server.listen(PORT, () => {
-    const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'https';
-
     console.log(`Server is listening on ${protocol}://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
 });
 
