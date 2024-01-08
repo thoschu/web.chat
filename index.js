@@ -17,11 +17,12 @@ const { v4: uuidv4 } = require('uuid');
 const winston = require("winston");
 
 const PORT = 3000;
-const key = fs.readFileSync("./mkcert/localhost-key.pem", "utf-8");
-const cert = fs.readFileSync("./mkcert/localhost.pem", "utf-8");
 const app = express();
 const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'http';
-const server = protocol === 'https' ? https.createServer({ key, cert }, app) : createServer(app);
+const server = protocol === 'https' ? https.createServer({
+    key: fs.readFileSync('./mkcert/localhost-key.pem', 'utf-8'),
+    cert: fs.readFileSync('./mkcert/localhost.pem', 'utf-8')
+}, app) : createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_APIKEY
@@ -118,23 +119,25 @@ io.on('connection', async (socket) => {
             });
         }
 
-        const randomNumber = Math.floor(Math.random() * 4) + 1;
+        if (process.env.ENVIRONMENT !== 'development') {
+            const randomNumber = Math.floor(Math.random() * 4) + 1;
 
-        if (process.env.ENVIRONMENT !== 'development' && randomNumber === 1) {
-            const response = await getBotResponse(msg);
+            if(randomNumber === 1) {
+                const response = await getBotResponse(msg);
 
-            emitBotMessage(response, (message) => {
-                io.emit('info user', message);
-            });
+                emitBotMessage(response, (message) => {
+                    io.emit('info user', message);
+                });
+            }
         }
     });
 });
 
 app.get('/', (req, res) => {
-    res.redirect(`/${uuidv4(null, null, null)}`);
+    res.redirect(`/room/${uuidv4(null, null, null)}`);
 });
 
-app.get('/:room', (req, res) => {
+app.get('/room/:room', (req, res) => {
     if(users.size > 1) {
         res.sendStatus(405);
     } else {
@@ -172,7 +175,7 @@ app.get('/ping', (_req, res) => {
 });
 
 app.get('/status', async (_req, res) => {
-    const itr = users.entries();
+    const itr= users.entries();
     const entries = [];
 
     for(let i= 0; i < users.size; i++) {
@@ -206,7 +209,7 @@ const emitBotMessage = (response, cb) => {
 
 const getBotResponse = async (message) => {
     try {
-        return await axios.get(`http://localhost:3000/bot?message=${message}`);
+        return await axios.get(`//localhost:3000/bot?message=${message}`);
     } catch (error) {
         logger.error(error);
     }

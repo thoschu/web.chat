@@ -18,7 +18,7 @@
             }
 
             .container {
-                width: 60% !important;
+                width: 50vw !important;
                 margin: 0;
                 padding: 0;
             }
@@ -140,6 +140,23 @@
 
             .jq-toast-wrap {
                 min-width: 18vw;
+            }
+
+            @media screen and (max-width: 1400px) {
+                video {
+                    width: 100%;
+                    height: auto;
+                }
+
+                div.iziToast {
+                    width: 280px;
+                }
+            }
+
+            @media screen and (max-width: 1200px) {
+                div.iziToast, div.jq-toast-wrap {
+                    display: none;
+                }
             }
         </style>
         <link rel="icon" href="//cdn1.iconfinder.com/data/icons/freeline/32/bubble_chat_comment_message_outline_talk-32.png" type="image/x-icon">
@@ -356,7 +373,7 @@
                         image: '',
                         imageWidth: 0,
                         maxWidth: null,
-                        zindex: null,
+                        zindex: 10000001,
                         layout: 1,
                         balloon: false,
                         close: false,
