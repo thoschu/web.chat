@@ -346,7 +346,7 @@
 
                 const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
 
-                //console.dir(supportedConstraints);
+                console.dir(supportedConstraints);
             });
 
             socket.on('new user', (newId, emit = true) => {
@@ -436,20 +436,20 @@
                                 navigator.mediaDevices.getUserMedia(constraints)
                                     .then((stream) => {
                                         // MediaStream
-                                        //console.dir(stream);
+                                        console.dir(stream);
 
                                         localVideo.srcObject = stream;
 
                                         const tracks = stream.getTracks();
 
                                         // MediaStreamTrack[]
-                                        //console.dir(tracks);
+                                        console.dir(tracks);
 
                                         tracks.forEach(track => {
                                             // MediaStreamTrack[]
                                             console.dir(track);
 
-                                            //  console.dir(track.getConstraints());
+                                            console.dir(track.getConstraints());
                                             console.dir(track.getCapabilities());
 
                                             // track.stop();
