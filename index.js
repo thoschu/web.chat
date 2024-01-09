@@ -56,6 +56,8 @@ const transporter = createTransport({
 
 const users = new Set();
 
+app.use('/assets', express.static('assets'));
+
 io.on('connection', async (socket) => {
     if (process.env.ENVIRONMENT !== 'development') {
         const response = await getBotResponse(`a user connected`);
