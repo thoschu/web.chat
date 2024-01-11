@@ -115,7 +115,7 @@
             }
 
             li[data-user-id]::after {
-                content: " "attr(data-user-id)" ";
+                content: " " attr(data-user-id) " ";
                 margin-left: 5px;
                 font-weight: bold;
                 font-variant-caps: normal;
@@ -131,15 +131,15 @@
 
             @keyframes changeColor {
                 0% {
-                    content: " "attr(data-user-id)" ";
+                    content: " " attr(data-user-id) " ";
                     color: inherit;
                 }
                 50% {
-                    content: " "attr(data-user-id)" ";
+                    content: " " attr(data-user-id) " ";
                     color: transparent;
                 }
                 100% {
-                    content: " "attr(data-user-id)" ";
+                    content: " " attr(data-user-id) " ";
                     color: darkgrey;
                 }
             }
@@ -176,11 +176,34 @@
             <script src="//oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
             <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
+        <!--
+        <script>
+            var _paq = window._paq = window._paq || [];
+            _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+            _paq.push(["setCookieDomain", "*.techstack.ch"]);
+            _paq.push(['trackPageView']);
+            _paq.push(['enableLinkTracking']);
+            (function () {
+                var u = "//analytics.thomas-schulte.de/";
+                _paq.push(['setTrackerUrl', u + 'matomo.php']);
+                _paq.push(['setSiteId', '2']);
+                var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+                g.async = true;
+                g.src = u + 'matomo.js';
+                s.parentNode.insertBefore(g, s);
+            })();
+        </script>
+        <noscript>
+            <p>
+                <img referrerpolicy="no-referrer-when-downgrade" src="//analytics.thomas-schulte.de/matomo.php?idsite=2&amp;rec=1" style="border:0;" alt="">
+            </p>
+        </noscript>
+        -->
     </head>
     <body class="container">
         <header class="row">
             <h2 class="col-md-12 text-center animate__animated animate__lightSpeedInRight">Moin …</h2>
-            <h3 id="moin" class="col-md-12 text-center animate__animated animate__lightSpeedInLeft animate__delay-1s">∘techstack.ch∘ </h3>
+            <h3 id="moin" class="col-md-12 text-center animate__animated animate__lightSpeedInLeft animate__delay-1s">∘techstack.ch∘</h3>
             <div class="col-md-12 animate__animated animate__fadeInDown animate__delay-2s animate__slow">
                 <canvas id="chatcanvas"></canvas>
             </div>
@@ -209,13 +232,15 @@
         <script type="importmap">
             {
                 "imports": {
-                    "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js"
+                    "lodash": "//cdn.jsdelivr.net/npm/lodash@4.17.21/+esm",
+                    "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js",
+                    "rxjs": "//cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm",
+                    "rxjs/webSocket": "https://esm.run/rxjs/webSocket"
                 }
             }
         </script>
-        <!-- analytics -->
         <script type="module">
-            import { io } from 'socket.io-client';
+            import {io} from 'socket.io-client';
 
             const element = document.getElementById('moin');
             const canvas = document.getElementById('chatcanvas');
@@ -263,11 +288,12 @@
                 ]
             };
 
-            let socket = io();
 
             const sound = new Howl({
                 src: ['../assets/ui-confirm.flac'],
             });
+
+            let socket = io();
 
             button.addEventListener('touchstart', (event) => {
                 event.preventDefault();
@@ -324,6 +350,10 @@
 
                 button.title = socketId;
 
+                if(toast) {
+                    toast.reset();
+                }
+
                 toast = $.toast({
                     text: `
                         <p>
@@ -332,7 +362,7 @@
                     `,
                     loader: false,
                     loaderBg: 'grey',
-                    allowToastClose : true,
+                    allowToastClose: true,
                     hideAfter: false,
                     position: 'top-left',
                     bgColor: '#ccc',
@@ -343,15 +373,11 @@
                     beforeHide: () => {},
                     afterHidden: () => {}
                 });
-
-                const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-
-                console.dir(supportedConstraints);
             });
 
             socket.on('new user', (newId, emit = true) => {
-                if(newId !== socket.id) {
-                    let peerConnection = null;
+                if (newId !== socket.id) {
+                    const peerConnection = new RTCPeerConnection(configuration);
 
                     iziToast.show({
                         id: socket.id,
@@ -411,50 +437,17 @@
                         buttons: {},
                         inputs: {},
                         onOpening: () => {
-                            peerConnection = new RTCPeerConnection(configuration);
                         },
                         onOpened: (_element) => {
                             const localVideo = document.getElementById("local-video");
-
-                            const constraints = {
-                                video: {
-                                    width: {
-                                        min: 1024,
-                                        ideal: 1280,
-                                        max: 1920
-                                    },
-                                    height: {
-                                        min: 567,
-                                        ideal: 720,
-                                        max: 1080
-                                    }
-                                },
-                                audio: true
-                            };
+                            const constraints = {video: true, audio: true};
 
                             if (navigator.mediaDevices.getUserMedia) {
                                 navigator.mediaDevices.getUserMedia(constraints)
                                     .then((stream) => {
-                                        // MediaStream
-                                        console.dir(stream);
-
                                         localVideo.srcObject = stream;
 
-                                        const tracks = stream.getTracks();
-
-                                        // MediaStreamTrack[]
-                                        console.dir(tracks);
-
-                                        tracks.forEach(track => {
-                                            // MediaStreamTrack[]
-                                            console.dir(track);
-
-                                            console.dir(track.getConstraints());
-                                            console.dir(track.getCapabilities());
-
-                                            // track.stop();
-                                            peerConnection.addTrack(track, stream);
-                                        });
+                                        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
 
                                         peerConnection.onicecandidate = event => {
                                             if (event.candidate) {
@@ -485,14 +478,17 @@
                                             .then(() => {
                                                 socket.emit('signal', {'sdp': peerConnection.localDescription});
                                             });
+
                                     })
                                     .catch((error) => {
                                         console.error(error);
                                     });
                             }
                         },
-                        onClosing:  () => {},
-                        onClosed:  () => {}
+                        onClosing: () => {
+                        },
+                        onClosed: () => {
+                        }
                     });
 
                     iziToast.show({
@@ -534,22 +530,22 @@
 
                             if (navigator.mediaDevices.getUserMedia) {
                                 peerConnection.ontrack = event => {
-                                    console.dir(event);
-
                                     remoteVideo.srcObject = event.streams[0];
                                 };
                             }
                         },
                         onOpened: (_element) => {
-                            if(emit) {
+                            if (emit) {
                                 socket.emit('update', {
                                     from: socket.id,
                                     to: newId
                                 });
                             }
                         },
-                        onClosing:  () => {},
-                        onClosed:  () => {}
+                        onClosing: () => {
+                        },
+                        onClosed: () => {
+                        }
                     });
                 }
             });
@@ -563,10 +559,14 @@
                             ${socketId} <h3 class="animate__animated animate__flash animate__delay-1s"><b> ${size} </b></h3>
                         </p>
                     `,
-                    beforeShow: () => {},
-                    afterShown: () => {},
-                    beforeHide: () => {},
-                    afterHidden: () => {}
+                    beforeShow: () => {
+                    },
+                    afterShown: () => {
+                    },
+                    beforeHide: () => {
+                    },
+                    afterHidden: () => {
+                    }
                 });
             });
 
@@ -616,6 +616,14 @@
 
             input.addEventListener('input', (event) => {
                 button.disabled = !event.data;
+            });
+
+            input.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+
+                    button.click();
+                }
             });
         </script>
     </body>
