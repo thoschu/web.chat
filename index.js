@@ -14,7 +14,34 @@ const { createTransport } = require('nodemailer');
 const { from, first, of, map} = require('rxjs');
 const { head } = require('ramda');
 const { v4: uuidv4 } = require('uuid');
-const winston = require("winston");
+const winston = require('winston');
+//const { WebSocketServer, WebSocket } = require('ws');
+//
+//const wss = new WebSocketServer({ port: 3030 });
+//
+// wss.on('connection',  (ws) => {
+//     console.log('connection');
+//
+//     ws.on('message', (data, isBinary) => {
+//         console.dir(data);
+//
+//         // A client WebSocket broadcasting to all connected WebSocket clients, including itself.
+//         // wss.clients.forEach((client) => {
+//         //     if (client.readyState === WebSocket.OPEN) {
+//         //         client.send(data, { binary: isBinary });
+//         //     }
+//         // });
+//
+//         // A client WebSocket broadcasting to every other connected WebSocket clients, excluding itself.
+//         wss.clients.forEach((client) => {
+//             if (client !== ws && client.readyState === WebSocket.OPEN) {
+//                 client.send(data, { binary: isBinary });
+//             }
+//         });
+//     });
+//
+//     ws.on('error', console.error);
+// });
 
 const PORT = 3000;
 const app = express();

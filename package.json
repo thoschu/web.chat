@@ -45,7 +45,8 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.2",
     "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "dotenv-cli": "^7.3.0"

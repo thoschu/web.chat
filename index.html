@@ -241,16 +241,37 @@
         </script>
         <script type="module">
             import {io} from 'socket.io-client';
+            // import _ from 'lodash';
+            // import { filter, from, map, tap } from 'rxjs';
+            // import { webSocket }  from 'rxjs/webSocket';
+            //
+            // const list$ = from([1,2,3,4,5,6]).pipe(filter(x => x > 3), map(x => x * x));
+            //
+            // list$.subscribe((res) => {
+            //     console.log(_.multiply(res, 100));
+            // });
+            //
+            // const subject = webSocket('ws://localhost:3030');
+            //
+            // subject.subscribe({
+            //     next: msg => console.dir(msg),
+            //     error: err => console.log(err),
+            //     complete: () => console.log('complete')
+            // });
+            //
+            // subject.next({ message: 'some message message-including' });
+            // subject.next({ message: 'some message message-excluding' });
 
             const element = document.getElementById('moin');
             const canvas = document.getElementById('chatcanvas');
             const button = document.getElementById('send_button');
             const input = document.getElementById('m');
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const recordedBlobs = [];
+            let context = canvas.getContext('2d');
             let counter = 0;
             let toast;
-
-            let context = canvas.getContext('2d');
+            let mediaRecorder;
             let W, H;
 
             W = canvas.width = window.innerWidth;
@@ -287,7 +308,6 @@
                     }
                 ]
             };
-
 
             const sound = new Howl({
                 src: ['../assets/ui-confirm.flac'],
@@ -375,9 +395,16 @@
                 });
             });
 
+            console.log(navigator.mediaDevices.getSupportedConstraints());
+
             socket.on('new user', (newId, emit = true) => {
                 if (newId !== socket.id) {
                     const peerConnection = new RTCPeerConnection(configuration);
+                    const collection = document.getElementsByClassName('iziToast');
+
+                    if(collection.length !== 0) {
+                        iziToast.destroy();
+                    }
 
                     iziToast.show({
                         id: socket.id,
@@ -436,18 +463,62 @@
                         transitionOutMobile: 'fadeOutDown',
                         buttons: {},
                         inputs: {},
-                        onOpening: () => {
-                        },
+                        onOpening: () => {},
                         onOpened: (_element) => {
                             const localVideo = document.getElementById("local-video");
-                            const constraints = {video: true, audio: true};
+                            const constraints = {
+                                video: {
+                                    width: {
+                                        // min: 1024,
+                                        // ideal: 1280,
+                                        // max: 3840,
+                                        exact: 1920
+                                    },
+                                    height: {
+                                        // min: 567,
+                                        // ideal: 720,
+                                        // max: 2160,
+                                        exact: 1080
+                                    }
+                                },
+                                audio: true
+                            };
 
                             if (navigator.mediaDevices.getUserMedia) {
                                 navigator.mediaDevices.getUserMedia(constraints)
                                     .then((stream) => {
                                         localVideo.srcObject = stream;
 
-                                        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+                                        // ToDo: FFmpeg
+                                        mediaRecorder = new MediaRecorder(stream);
+
+                                        mediaRecorder.ondataavailable = event => {
+                                            if (event.data && event.data.size > 0) {
+                                                recordedBlobs.push(event.data);
+                                            }
+                                        };
+
+                                        mediaRecorder.start();
+
+                                        stream.getTracks().forEach(track => {
+                                            //console.log(track);
+                                            //console.log(track.getConstraints());
+                                            //console.log(track.getCapabilities());
+                                            //console.log(track.getSettings());
+
+                                            if(track.kind === 'video') {
+                                                track.applyConstraints({
+                                                    width: {
+                                                        exact: 500
+                                                    },
+                                                    height: {
+                                                        exact: 750
+                                                    }
+                                                });
+                                            }
+
+                                            peerConnection.addTrack(track, stream);
+                                        });
 
                                         peerConnection.onicecandidate = event => {
                                             if (event.candidate) {
@@ -485,10 +556,8 @@
                                     });
                             }
                         },
-                        onClosing: () => {
-                        },
-                        onClosed: () => {
-                        }
+                        onClosing: () => {},
+                        onClosed: () => {}
                     });
 
                     iziToast.show({
@@ -542,10 +611,8 @@
                                 });
                             }
                         },
-                        onClosing: () => {
-                        },
-                        onClosed: () => {
-                        }
+                        onClosing: () => {},
+                        onClosed: () => {}
                     });
                 }
             });
@@ -559,14 +626,10 @@
                             ${socketId} <h3 class="animate__animated animate__flash animate__delay-1s"><b> ${size} </b></h3>
                         </p>
                     `,
-                    beforeShow: () => {
-                    },
-                    afterShown: () => {
-                    },
-                    beforeHide: () => {
-                    },
-                    afterHidden: () => {
-                    }
+                    beforeShow: () => {},
+                    afterShown: () => {},
+                    beforeHide: () => {},
+                    afterHidden: () => {}
                 });
             });
 
@@ -618,11 +681,16 @@
                 button.disabled = !event.data;
             });
 
-            input.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter') {
+            document.addEventListener('keydown', (event) => {
+                if (event.ctrlKey && event.key === 's') {
                     event.preventDefault();
 
-                    button.click();
+                    mediaRecorder.stop();
+
+                    const superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
+                    const objectURL = window.URL.createObjectURL(superBuffer);
+
+                    // video.src = objectURL;s
                 }
             });
         </script>
