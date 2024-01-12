@@ -77,7 +77,7 @@ const transporter = createTransport({
     secure: true,
     auth: {
         user: 'thoschulte@gmail.com',
-        pass: 'dbtw lfvh jozh dwkb'
+        pass: process.env.GMAIL_PASS
     }
 });
 
