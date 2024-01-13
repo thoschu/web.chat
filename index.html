@@ -390,6 +390,8 @@
 
                 mediaRecorder.stop();
 
+                console.dir(recordedBlobs);
+
                 worker.postMessage(recordedBlobs, null);
             });
 
@@ -725,37 +727,59 @@
                 if (event.ctrlKey && event.key === 's') {
                     event.preventDefault();
 
-                    mediaRecorder.stop();
+                    console.dir(recordedBlobs);
 
                     const superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
                     const objectURL = window.URL.createObjectURL(superBuffer);
+                    const id = 'nonse';
+                    const popup = new Popup({
+                        id,
+                        ackgroundColor: "#bff7ff",
+                        showImmediately: true,
+                        sideMargin: "5%",
+                        title: '',
+                        fadeTime: ".7s",
+                        css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
+                        content: `
+                            <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
+                        `,
+                        hideCallback: () => {
+                            console.dir(popup);
+                        },
+                        loadCallback: () => {
+                            let video = document.getElementById(`remote-video-record-${id}`);
 
-                    // video.src = objectURL;
+                            console.log(objectURL);
+
+                            video.src=`${objectURL}`;
+                        },
+                    });
                 }
             });
 
             worker.addEventListener('message', (e) => {
-                const id = 'nonse';
-                const popup = new Popup({
-                    id,
-                    ackgroundColor: "#bff7ff",
-                    showImmediately: true,
-                    sideMargin: "5%",
-                    title: '',
-                    fadeTime: ".7s",
-                    css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
-                    content: `
-                        <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
-                    `,
-                    hideCallback: () => {
-                        console.dir(popup);
-                    },
-                    loadCallback: () => {
-                        let video = document.getElementById(`remote-video-record-${id}`);
-
-                        video.src=`${e.data}`;
-                    },
-                });
+                console.log(e.data);
+                // const id = 'nonse';
+                // const popup = new Popup({
+                //     id,
+                //     ackgroundColor: "#bff7ff",
+                //     showImmediately: true,
+                //     sideMargin: "5%",
+                //     title: '',
+                //     fadeTime: ".7s",
+                //     css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
+                //     content: `
+                //         <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
+                //     `,
+                //     hideCallback: () => {
+                //         console.dir(popup);
+                //     },
+                //     loadCallback: () => {
+                //         let video = document.getElementById(`remote-video-record-${id}`);
+                //
+                //         video.src=`${e.data}`;
+                //     },
+                // });
             }, false);
         </script>
     </body>
