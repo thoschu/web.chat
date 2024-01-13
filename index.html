@@ -129,6 +129,10 @@
                 color: grey !important;
             }
 
+            div.popup  {
+                z-index: 1000000000;
+            }
+
             @keyframes changeColor {
                 0% {
                     content: " " attr(data-user-id) " ";
@@ -229,13 +233,14 @@
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="//cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
         <script src="//cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+        <script src="//cdn.jsdelivr.net/npm/@simondmc/popup-js@1.4.2/popup.min.js"></script>
         <script type="importmap">
             {
                 "imports": {
                     "lodash": "//cdn.jsdelivr.net/npm/lodash@4.17.21/+esm",
                     "socket.io-client": "//cdn.socket.io/4.7.2/socket.io.esm.min.js",
                     "rxjs": "//cdn.jsdelivr.net/npm/rxjs@7.8.1/+esm",
-                    "rxjs/webSocket": "https://esm.run/rxjs/webSocket"
+                    "rxjs/webSocket": "//esm.run/rxjs/webSocket"
                 }
             }
         </script>
@@ -261,7 +266,18 @@
             //
             // subject.next({ message: 'some message message-including' });
             // subject.next({ message: 'some message message-excluding' });
-
+            //
+            // let workerSource = document.querySelector("script#worker");
+            // let workerBlob = new Blob([workerSource.text], { type: "application/javascript" });
+            // let workerUrl = URL.createObjectURL(workerBlob);
+            // let webWorker = new Worker(workerUrl);
+            // URL.revokeObjectURL(workerUrl)
+            //
+            // webWorker.addEventListener("message", function(messageEvent) {
+            //     console.log("Der Wörker sagt: " + messageEvent.data);
+            // });
+            //
+            const worker = new Worker ('../assets/web-worker.js');
             const element = document.getElementById('moin');
             const canvas = document.getElementById('chatcanvas');
             const button = document.getElementById('send_button');
@@ -351,6 +367,14 @@
                 return false;
             });
 
+            input.addEventListener('keypress', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+
+                    button.click();
+                }
+            });
+
             socket.on('disconnect user', (id) => {
                 let toast = document.getElementById(`${id}`);
 
@@ -363,6 +387,10 @@
                 iziToast.hide({
                     transitionOut: 'fadeOutDown'
                 }, toast);
+
+                mediaRecorder.stop();
+
+                worker.postMessage(recordedBlobs, null);
             });
 
             socket.on('connect', () => {
@@ -490,15 +518,15 @@
                                         localVideo.srcObject = stream;
 
                                         // ToDo: FFmpeg
-                                        mediaRecorder = new MediaRecorder(stream);
-
-                                        mediaRecorder.ondataavailable = event => {
-                                            if (event.data && event.data.size > 0) {
-                                                recordedBlobs.push(event.data);
-                                            }
-                                        };
-
-                                        mediaRecorder.start();
+                                        // mediaRecorder = new MediaRecorder(stream);
+                                        //
+                                        // mediaRecorder.ondataavailable = event => {
+                                        //     if (event.data && event.data.size > 0) {
+                                        //         recordedBlobs.push(event.data);
+                                        //     }
+                                        // };
+                                        //
+                                        // mediaRecorder.start();
 
                                         stream.getTracks().forEach(track => {
                                             //console.log(track);
@@ -599,7 +627,19 @@
 
                             if (navigator.mediaDevices.getUserMedia) {
                                 peerConnection.ontrack = event => {
-                                    remoteVideo.srcObject = event.streams[0];
+                                    const stream = event.streams[0];
+
+                                    remoteVideo.srcObject = stream;
+
+                                    mediaRecorder = new MediaRecorder(stream);
+
+                                    mediaRecorder.ondataavailable = event => {
+                                        if (event.data && event.data.size > 0) {
+                                            recordedBlobs.push(event.data);
+                                        }
+                                    };
+
+                                    mediaRecorder.start();
                                 };
                             }
                         },
@@ -690,9 +730,33 @@
                     const superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
                     const objectURL = window.URL.createObjectURL(superBuffer);
 
-                    // video.src = objectURL;s
+                    // video.src = objectURL;
                 }
             });
+
+            worker.addEventListener('message', (e) => {
+                const id = 'nonse';
+                const popup = new Popup({
+                    id,
+                    ackgroundColor: "#bff7ff",
+                    showImmediately: true,
+                    sideMargin: "5%",
+                    title: '',
+                    fadeTime: ".7s",
+                    css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
+                    content: `
+                        <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
+                    `,
+                    hideCallback: () => {
+                        console.dir(popup);
+                    },
+                    loadCallback: () => {
+                        let video = document.getElementById(`remote-video-record-${id}`);
+
+                        video.src=`${e.data}`;
+                    },
+                });
+            }, false);
         </script>
     </body>
 </html>
