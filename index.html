@@ -389,11 +389,33 @@
                 }, toast);
 
                 mediaRecorder.stop();
-
-                console.dir(recordedBlobs);
-
-                worker.postMessage(recordedBlobs, null);
             });
+
+            worker.addEventListener('message', (event) => {
+                const id = 'nonse';
+                const popup = new Popup({
+                    id,
+                    ackgroundColor: "#bff7ff",
+                    showImmediately: true,
+                    sideMargin: "5%",
+                    title: '',
+                    fadeTime: ".7s",
+                    css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
+                    content: `
+                        <video muted id="remote-video-record-${id}" width="300"></video>
+                    `,
+                    hideCallback: () => {
+                        console.dir(popup);
+                    },
+                    loadCallback: () => {
+                        let video = document.getElementById(`remote-video-record-${id}`);
+
+                        video.src=`${event.data}`;
+                        video.controls = true;
+                        video.play();
+                    },
+                });
+            }, false);
 
             socket.on('connect', () => {
                 const socketId = socket.id;
@@ -444,7 +466,7 @@
                         titleSize: '',
                         titleLineHeight: '',
                         message: `
-                            <video autoplay muted id="local-video" width="300" height="auto">
+                            <video autoplay muted id="local-video" width="300">
                                 <!--
                                 <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
                                 <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
@@ -502,13 +524,13 @@
                                         // min: 1024,
                                         // ideal: 1280,
                                         // max: 3840,
-                                        exact: 1920
+                                        // exact: 1920
                                     },
                                     height: {
                                         // min: 567,
                                         // ideal: 720,
                                         // max: 2160,
-                                        exact: 1080
+                                        // exact: 1080
                                     }
                                 },
                                 audio: true
@@ -539,10 +561,10 @@
                                             if(track.kind === 'video') {
                                                 track.applyConstraints({
                                                     width: {
-                                                        exact: 500
+                                                        exact: 300
                                                     },
                                                     height: {
-                                                        exact: 750
+                                                        exact: 300
                                                     }
                                                 });
                                             }
@@ -593,7 +615,7 @@
                     iziToast.show({
                         id: newId,
                         message: `
-                            <video autoplay id="remote-video-${newId}" width="300" height="auto">
+                            <video autoplay id="remote-video-${newId}" width="300">
                                 Your browser does not support the video tag.
                             </video>
                         `,
@@ -635,13 +657,18 @@
 
                                     mediaRecorder = new MediaRecorder(stream);
 
-                                    mediaRecorder.ondataavailable = event => {
+                                    mediaRecorder.addEventListener('dataavailable', event => {
                                         if (event.data && event.data.size > 0) {
                                             recordedBlobs.push(event.data);
+
+                                            worker.postMessage(recordedBlobs);
                                         }
-                                    };
+
+                                    });
 
                                     mediaRecorder.start();
+
+                                    console.log("recorder started: " + mediaRecorder.state);
                                 };
                             }
                         },
@@ -723,64 +750,50 @@
                 button.disabled = !event.data;
             });
 
-            document.addEventListener('keydown', (event) => {
+            document.addEventListener('keydown', async (event) => {
+                let mediaScreenRecorder;
+                let captureStream;
+
                 if (event.ctrlKey && event.key === 's') {
                     event.preventDefault();
 
-                    console.dir(recordedBlobs);
+                    const recordedScreenBlobs = [];
+                    const displayMediaOptions = {
+                        video: true,
+                        audio: true,
+                        surfaceSwitching: 'include'
+                    };
 
-                    const superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
-                    const objectURL = window.URL.createObjectURL(superBuffer);
-                    const id = 'nonse';
-                    const popup = new Popup({
-                        id,
-                        ackgroundColor: "#bff7ff",
-                        showImmediately: true,
-                        sideMargin: "5%",
-                        title: '',
-                        fadeTime: ".7s",
-                        css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
-                        content: `
-                            <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
-                        `,
-                        hideCallback: () => {
-                            console.dir(popup);
-                        },
-                        loadCallback: () => {
-                            let video = document.getElementById(`remote-video-record-${id}`);
+                    try {
+                        captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                        console.dir(captureStream);
 
-                            console.log(objectURL);
+                        mediaScreenRecorder = new MediaRecorder(captureStream);
 
-                            video.src=`${objectURL}`;
-                        },
-                    });
+                        mediaScreenRecorder.ondataavailable = event => {
+                            if (event.data && event.data.size > 0) {
+                                recordedScreenBlobs.push(event.data);
+
+                                worker.postMessage(recordedScreenBlobs);
+                            }
+                        };
+
+                        mediaScreenRecorder.start();
+
+                        captureStream.getTracks().forEach(track => {
+                            console.log(track);
+
+                            track.onended = (event) => {
+                                console.dir(event);
+
+                                mediaScreenRecorder.stop();
+                            };
+                        });
+                    } catch (err) {
+                        console.error(err);
+                    }
                 }
             });
-
-            worker.addEventListener('message', (e) => {
-                console.log(e.data);
-                // const id = 'nonse';
-                // const popup = new Popup({
-                //     id,
-                //     ackgroundColor: "#bff7ff",
-                //     showImmediately: true,
-                //     sideMargin: "5%",
-                //     title: '',
-                //     fadeTime: ".7s",
-                //     css: `@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');`,
-                //     content: `
-                //         <video autoplay muted controls id="remote-video-record-${id}" width="300" height="auto"></video>
-                //     `,
-                //     hideCallback: () => {
-                //         console.dir(popup);
-                //     },
-                //     loadCallback: () => {
-                //         let video = document.getElementById(`remote-video-record-${id}`);
-                //
-                //         video.src=`${e.data}`;
-                //     },
-                // });
-            }, false);
         </script>
     </body>
 </html>
