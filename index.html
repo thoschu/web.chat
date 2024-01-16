@@ -792,6 +792,56 @@
                     } catch (err) {
                         console.error(err);
                     }
+                } else if(event.ctrlKey && event.key === 'x') {
+                    event.preventDefault();
+
+                    try {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+
+                        devices.forEach(device => {
+                            console.log(device);
+                        });
+
+
+                        $.toast({
+                            text: `
+                                <div>
+                                    <label for="audio-input">Select audio input:&nbsp;</label>
+                                    <select name="audio-input" id="audio-input">
+                                      <option value="ccc">CCC</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="audio-output">Select audio output:</label>
+                                    <select name="audio-output" id="audio-output">
+                                      <option value="bbb">BBB</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="video-input">Select video input:&nbsp;</label>
+                                    <select name="video-input" id="video-input">
+                                      <option value="aaa">AAA</option>
+                                    </select>
+                                </div>
+                            `,
+                            heading: '',
+                            icon: 'info',
+                            showHideTransition: 'fade',
+                            allowToastClose: true,
+                            hideAfter: 30000,
+                            textAlign: 'left',
+                            loader: true,
+                            loaderBg: 'grey',
+                            bgColor: '#ccc',
+                            textColor: 'black',
+                            beforeShow: () => {},
+                            afterShown: () => {},
+                            beforeHide: () => {},
+                            afterHidden: () => {}
+                        });
+                    } catch (err) {
+                        console.error(err);
+                    }
                 }
             });
         </script>
