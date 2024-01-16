@@ -245,7 +245,7 @@
             }
         </script>
         <script type="module">
-            import {io} from 'socket.io-client';
+            import { io } from 'socket.io-client';
             // import _ from 'lodash';
             // import { filter, from, map, tap } from 'rxjs';
             // import { webSocket }  from 'rxjs/webSocket';
@@ -285,6 +285,7 @@
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             const recordedBlobs = [];
             let context = canvas.getContext('2d');
+            let connected = false;
             let counter = 0;
             let toast;
             let mediaRecorder;
@@ -389,6 +390,7 @@
                 }, toast);
 
                 mediaRecorder.stop();
+                connected = false;
             });
 
             worker.addEventListener('message', (event) => {
@@ -679,6 +681,8 @@
                                     to: newId
                                 });
                             }
+
+                            connected = true;
                         },
                         onClosing: () => {},
                         onClosed: () => {}
@@ -792,8 +796,12 @@
                     } catch (err) {
                         console.error(err);
                     }
-                } else if(event.ctrlKey && event.key === 'x') {
+                } else if(event.ctrlKey && event.key === 'x' && connected) {
                     event.preventDefault();
+
+                    let audioInput;
+                    let audioOutput;
+                    let videoInput;
 
                     try {
                         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -829,11 +837,9 @@
                             bgColor: '#ccc',
                             textColor: 'black',
                             beforeShow: () => {
-                                const audioInput = document.querySelector('#audio-input');
-                                const audioOutput = document.querySelector('#audio-output');
-                                const videoInput = document.querySelector('#video-input');
-
-                                console.dir(audioInput);
+                                audioInput = document.querySelector('#audio-input');
+                                audioOutput = document.querySelector('#audio-output');
+                                videoInput = document.querySelector('#video-input');
 
                                 devices.forEach(device => {
                                     console.log(device);
@@ -852,6 +858,55 @@
                             },
                             afterShown: (res) => {
                                 console.dir(res);
+                                const localVideo = document.getElementById("local-video");
+
+                                audioInput.addEventListener('change', async (event) => {
+                                    const deviceId = event.target.value;
+                                    const constraints = {
+                                        audio: {
+                                            deviceId: {
+                                                exact: deviceId
+                                            }
+                                        },
+                                        video: true
+                                    };
+
+                                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                                    localVideo.srcObject = stream;
+
+                                    const tracks = stream.getAudioTracks();
+
+                                    console.dir(tracks);
+                                });
+
+                                audioOutput.addEventListener('change', async (event) => {
+                                    const deviceId = event.target.value;
+
+                                    await localVideo.setSinkId(deviceId);
+
+                                    console.dir('Changed audio output device: ' + deviceId);
+                                });
+
+                                videoInput.addEventListener('change', async (event) => {
+                                    const deviceId = event.target.value;
+                                    const constraints = {
+                                        video: {
+                                            deviceId: {
+                                                exact: deviceId
+                                            }
+                                        },
+                                        audio: true
+                                    };
+
+                                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                                    localVideo.srcObject = stream;
+
+                                    const tracks = stream.getVideoTracks();
+
+                                    console.dir(tracks);
+                                });
                             },
                             beforeHide: () => {},
                             afterHidden: () => {}
