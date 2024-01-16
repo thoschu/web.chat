@@ -798,34 +798,28 @@
                     try {
                         const devices = await navigator.mediaDevices.enumerateDevices();
 
-                        devices.forEach(device => {
-                            console.log(device);
-                        });
-
-
                         $.toast({
                             text: `
-                                <div>
+                                <div style="padding: 5px;">
                                     <label for="audio-input">Select audio input:&nbsp;</label>
-                                    <select name="audio-input" id="audio-input">
-                                      <option value="ccc">CCC</option>
-                                    </select>
+                                    <br>
+                                    <select name="audio-input" id="audio-input" style="width:100%;"></select>
                                 </div>
-                                <div>
+                                <hr>
+                                <div style="padding: 5px;">
                                     <label for="audio-output">Select audio output:</label>
-                                    <select name="audio-output" id="audio-output">
-                                      <option value="bbb">BBB</option>
-                                    </select>
+                                    <br>
+                                    <select name="audio-output" id="audio-output" style="width:100%;"></select>
                                 </div>
-                                <div>
+                                <hr>
+                                <div style="padding: 5px;">
                                     <label for="video-input">Select video input:&nbsp;</label>
-                                    <select name="video-input" id="video-input">
-                                      <option value="aaa">AAA</option>
-                                    </select>
+                                    <br>
+                                    <select name="video-input" id="video-input" style="width:100%;"></select>
                                 </div>
                             `,
                             heading: '',
-                            icon: 'info',
+                            icon: false,
                             showHideTransition: 'fade',
                             allowToastClose: true,
                             hideAfter: 30000,
@@ -834,8 +828,31 @@
                             loaderBg: 'grey',
                             bgColor: '#ccc',
                             textColor: 'black',
-                            beforeShow: () => {},
-                            afterShown: () => {},
+                            beforeShow: () => {
+                                const audioInput = document.querySelector('#audio-input');
+                                const audioOutput = document.querySelector('#audio-output');
+                                const videoInput = document.querySelector('#video-input');
+
+                                console.dir(audioInput);
+
+                                devices.forEach(device => {
+                                    console.log(device);
+                                    const option = document.createElement('option');
+                                    option.value = device.deviceId;
+                                    option.text = device.label;
+
+                                    if(device.kind === 'audioinput') {
+                                        audioInput.appendChild(option);
+                                    } else if(device.kind === 'audiooutput') {
+                                        audioOutput.appendChild(option);
+                                    } else if(device.kind === 'videoinput') {
+                                        videoInput.appendChild(option);
+                                    }
+                                });
+                            },
+                            afterShown: (res) => {
+                                console.dir(res);
+                            },
                             beforeHide: () => {},
                             afterHidden: () => {}
                         });
