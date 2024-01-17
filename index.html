@@ -298,34 +298,6 @@
 
             console.info(userAgent);
 
-            const configuration = {
-                'iceServers': [
-                    {
-                        'urls': [
-                            'stun:stun.l.google.com:19302',
-                            // 'stun:stun1.l.google.com:19302',
-                            // 'stun:stun2.l.google.com:19302',
-                            // 'stun:stun3.l.google.com:19302',
-                            // 'stun:stun4.l.google.com:19302',
-                            // 'stun:stun01.sipphone.com',
-                            // 'stun:stun.ekiga.net',
-                            // 'stun:stun.fwdnet.net',
-                            // 'stun:stun.ideasip.com',
-                            // 'stun:stun.iptel.org',
-                            // 'stun:stun.rixtelecom.se',
-                            // 'stun:stun.schlund.de',
-                            // 'stun:stunserver.org',
-                            // 'stun:stun.softjoys.com',
-                            // 'stun:stun.voiparound.com',
-                            // 'stun:stun.voipbuster.com',
-                            // 'stun:stun.voipstunt.com',
-                            // 'stun:stun.voxgratia.org',
-                            'stun:stun.xten.com'
-                        ]
-                    }
-                ]
-            };
-
             const sound = new Howl({
                 src: ['../assets/ui-confirm.flac'],
             });
@@ -453,7 +425,44 @@
 
             socket.on('new user', (newId, emit = true) => {
                 if (newId !== socket.id) {
-                    const peerConnection = new RTCPeerConnection(configuration);
+                    const configuration = {
+                        'iceServers': [
+                            {
+                                'urls': [
+                                    'stun:stun.l.google.com:19302',
+                                    // 'stun:stun1.l.google.com:19302',
+                                    // 'stun:stun2.l.google.com:19302',
+                                    // 'stun:stun3.l.google.com:19302',
+                                    // 'stun:stun4.l.google.com:19302',
+                                    // 'stun:stun01.sipphone.com',
+                                    // 'stun:stun.ekiga.net',
+                                    // 'stun:stun.fwdnet.net',
+                                    // 'stun:stun.ideasip.com',
+                                    // 'stun:stun.iptel.org',
+                                    // 'stun:stun.rixtelecom.se',
+                                    // 'stun:stun.schlund.de',
+                                    // 'stun:stunserver.org',
+                                    // 'stun:stun.softjoys.com',
+                                    // 'stun:stun.voiparound.com',
+                                    // 'stun:stun.voipbuster.com',
+                                    // 'stun:stun.voipstunt.com',
+                                    // 'stun:stun.voxgratia.org',
+                                    'stun:stun.xten.com'
+                                ]
+                            }
+                        ]
+                    };
+                    const rtcPeerConnection = new RTCPeerConnection(configuration);
+                    // rtcPeerConnection.addEventListener('icecandidate', () =>{});
+                    rtcPeerConnection.onicecandidate = event => {
+                        console.log('onicecandidate');
+                        console.dir(event);
+
+                        if (event.candidate) {
+                            socket.emit('signal', { 'candidate': event.candidate });
+                        }
+                    };
+
                     const collection = document.getElementsByClassName('iziToast');
 
                     if(collection.length !== 0) {
@@ -571,25 +580,38 @@
                                                 });
                                             }
 
-                                            peerConnection.addTrack(track, stream);
+                                            rtcPeerConnection.addTrack(track, stream);
                                         });
 
-                                        peerConnection.onicecandidate = event => {
-                                            if (event.candidate) {
-                                                socket.emit('signal', {'candidate': event.candidate});
-                                            }
-                                        };
+                                        rtcPeerConnection.createOffer()
+                                            .then(async offer => {
+                                                console.dir(offer);
+
+                                                return await rtcPeerConnection.setLocalDescription(offer);
+                                            })
+                                            .then((res) => {
+                                                console.dir(res);
+
+                                                return rtcPeerConnection.localDescription;
+                                            })
+                                            .then((sdp) => {
+                                                console.dir(sdp);
+
+                                                socket.emit('signal', { sdp });
+                                            });
 
                                         socket.on('signal', data => {
                                             if (data.candidate) {
-                                                peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                                                const rtcIceCandidate = new RTCIceCandidate(data.candidate);
+
+                                                rtcPeerConnection.addIceCandidate(rtcIceCandidate);
                                             } else if (data.sdp) {
                                                 const desc = new RTCSessionDescription(data.sdp);
 
-                                                peerConnection.setRemoteDescription(desc).then(() => {
+                                                rtcPeerConnection.setRemoteDescription(desc).then(() => {
                                                     if (desc.type === 'offer') {
-                                                        peerConnection.createAnswer().then(answer => {
-                                                            peerConnection.setLocalDescription(answer);
+                                                        rtcPeerConnection.createAnswer().then(answer => {
+                                                            rtcPeerConnection.setLocalDescription(answer);
 
                                                             socket.emit('signal', {'sdp': answer});
                                                         });
@@ -597,13 +619,6 @@
                                                 });
                                             }
                                         });
-
-                                        peerConnection.createOffer()
-                                            .then(offer => peerConnection.setLocalDescription(offer))
-                                            .then(() => {
-                                                socket.emit('signal', {'sdp': peerConnection.localDescription});
-                                            });
-
                                     })
                                     .catch((error) => {
                                         console.error(error);
@@ -652,7 +667,7 @@
                             const remoteVideo = document.getElementById(`remote-video-${newId}`);
 
                             if (navigator.mediaDevices.getUserMedia) {
-                                peerConnection.ontrack = event => {
+                                rtcPeerConnection.ontrack = event => {
                                     const stream = event.streams[0];
 
                                     remoteVideo.srcObject = stream;
