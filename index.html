@@ -244,8 +244,9 @@
                 }
             }
         </script>
+        <script src="/socket.io/socket.io.js"></script>
         <script type="module">
-            import { io } from 'socket.io-client';
+            // import { io } from 'socket.io-client';
             // import _ from 'lodash';
             // import { filter, from, map, tap } from 'rxjs';
             // import { webSocket }  from 'rxjs/webSocket';
@@ -453,6 +454,7 @@
                         ]
                     };
                     const rtcPeerConnection = new RTCPeerConnection(configuration);
+
                     // rtcPeerConnection.addEventListener('icecandidate', () =>{});
                     rtcPeerConnection.onicecandidate = event => {
                         console.log('onicecandidate');
@@ -595,6 +597,7 @@
                                                 return rtcPeerConnection.localDescription;
                                             })
                                             .then((sdp) => {
+                                                console.log('sdp');
                                                 console.dir(sdp);
 
                                                 socket.emit('signal', { sdp });
@@ -613,7 +616,7 @@
                                                         rtcPeerConnection.createAnswer().then(answer => {
                                                             rtcPeerConnection.setLocalDescription(answer);
 
-                                                            socket.emit('signal', {'sdp': answer});
+                                                            socket.emit('signal', { 'sdp': answer });
                                                         });
                                                     }
                                                 });

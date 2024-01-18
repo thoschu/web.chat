@@ -23,7 +23,8 @@
     "_tunnel": "npx ngrok http 3000 --authtoken $NGROK_AUTHTOKEN",
     "_tunnel:tls": "npx ngrok http https://localhost:3000 --authtoken $NGROK_AUTHTOKEN",
     "dotenv:chat": "dotenv -- npm run _chat",
-    "dotenv:tunnel:tls": "dotenv -- npm run _tunnel"
+    "dotenv:tunnel:tls": "dotenv -- npm run _tunnel",
+    "mkcert": "npx mkcert create-ca && npx mkcert create-cert"
   },
   "repository": {
     "type": "git",

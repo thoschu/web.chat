@@ -46,10 +46,9 @@ const winston = require('winston');
 const PORT = 3000;
 const app = express();
 const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'http';
-const server = protocol === 'https' ? https.createServer({
-    key: fs.readFileSync('./mkcert/localhost-key.pem', 'utf-8'),
-    cert: fs.readFileSync('./mkcert/localhost.pem', 'utf-8')
-}, app) : createServer(app);
+const key  = fs.readFileSync('./mkcert/localhost-key.pem', 'utf-8');
+const cert = fs.readFileSync('./mkcert/localhost.pem', 'utf-8');
+const server = protocol === 'https' ? https.createServer({key, cert}, app) : createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_APIKEY
