@@ -24,7 +24,8 @@
     "_tunnel:tls": "npx ngrok http https://localhost:3000 --authtoken $NGROK_AUTHTOKEN",
     "dotenv:chat": "dotenv -- npm run _chat",
     "dotenv:tunnel:tls": "dotenv -- npm run _tunnel",
-    "mkcert": "npx mkcert create-ca && npx mkcert create-cert"
+    "mkcert": "npx mkcert create-ca && npx mkcert create-cert",
+    "icu": "nvm install node --with-intl=full-icu"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "axios": "^1.6.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "full-icu": "^1.5.0",
     "nodemailer": "^6.9.8",
     "openai": "^4.24.1",
     "ramda": "^0.29.1",

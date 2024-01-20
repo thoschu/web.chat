@@ -43,6 +43,16 @@ const winston = require('winston');
 //     ws.on('error', console.error);
 // });
 
+// ICU
+// const number = 123456.789;
+// console.log(new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number));
+// console.log(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number));
+// console.log( ['thomas', 'äpfel', 'Müller', 'Zebra'].sort(new Intl.Collator('de-DE').compare));
+// console.log(new Intl.DateTimeFormat('en-GB', {dateStyle: 'full', timeStyle: 'long', timeZone: 'Australia/Sydney',}).format(new Date()));
+
+const env = process.env;
+const systemLocale = env.LANG || env.LANGUAGE || env.LOCALE || Intl.DateTimeFormat().resolvedOptions().locale;
+const timeZone = env.TIME_ZONE || Intl.DateTimeFormat().resolvedOptions().timeZone;
 const PORT = 3000;
 const app = express();
 const protocol = process.env.ENVIRONMENT === 'development' ? 'https' : 'http';
@@ -51,18 +61,27 @@ const cert = fs.readFileSync('./mkcert/localhost.pem', 'utf-8');
 const server = protocol === 'https' ? https.createServer({key, cert}, app) : createServer(app);
 const io = new Server(server);
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_APIKEY
+    apiKey: env.OPENAI_APIKEY
 });
+
 
 const logger = winston.createLogger({
     level: "info",
     format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp(),
-        winston.format.printf(
-            (info) => `${info.timestamp} ${info.level}: ${info.message}`
-        )
+        winston.format.printf(({ level, message, timestamp }) => {
+            const date = new Date(timestamp);
+            const dateFormatter = new Intl.DateTimeFormat(systemLocale, {
+                dateStyle: 'full',
+                timeStyle: 'long',
+                timeZone
+            });
+
+            return `${dateFormatter.format(date)} ${level}: ${message}`;
+        })
     ),
+    defaultMeta: { service: 'chat-service' },
     transports: [
         new winston.transports.Console(),
         new winston.transports.File({ filename: "logs/app.log" }),
@@ -76,7 +95,7 @@ const transporter = createTransport({
     secure: true,
     auth: {
         user: 'thoschulte@gmail.com',
-        pass: process.env.GMAIL_PASS
+        pass: env.GMAIL_PASS
     }
 });
 
@@ -85,7 +104,7 @@ const users = new Set();
 app.use('/assets', express.static('assets'));
 
 io.on('connection', async (socket) => {
-    if (process.env.ENVIRONMENT !== 'development') {
+    if (env.ENVIRONMENT !== 'development') {
         const response = await getBotResponse(`a user connected`);
 
         emitBotMessage(response, (message) => {
@@ -114,7 +133,7 @@ io.on('connection', async (socket) => {
 
         io.emit('users size', users.size);
 
-        if (process.env.ENVIRONMENT !== 'development') {
+        if (env.ENVIRONMENT !== 'development') {
             const response = await getBotResponse(`a user disconnected`);
 
             emitBotMessage(response, (message) => {
@@ -137,7 +156,7 @@ io.on('connection', async (socket) => {
 
         io.emit('chat message', {msg, id: socket.id});
 
-        if (process.env.ENVIRONMENT !== 'development') {
+        if (env.ENVIRONMENT !== 'development') {
             await transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     logger.error(error);
@@ -147,7 +166,7 @@ io.on('connection', async (socket) => {
             });
         }
 
-        if (process.env.ENVIRONMENT !== 'development') {
+        if (env.ENVIRONMENT !== 'development') {
             const randomNumber = Math.floor(Math.random() * 4) + 1;
 
             if(randomNumber === 1) {
@@ -221,7 +240,11 @@ app.get('/status', async (_req, res) => {
 });
 
 server.listen(PORT, () => {
-    logger.info(`Server is listening on ${protocol}://localhost:${PORT} in ${process.env.ENVIRONMENT}`);
+    logger.log({
+        level: 'info',
+        message: `Locale: ${systemLocale}, timezone: ${timeZone}.`
+    });
+    logger.info(`Server is listening on ${protocol}://localhost:${PORT} in ${env.ENVIRONMENT}.`);
 });
 
 const emitBotMessage = (response, cb) => {
