@@ -242,9 +242,12 @@ app.get('/status', async (_req, res) => {
 server.listen(PORT, () => {
     logger.log({
         level: 'info',
-        message: `Locale: ${systemLocale}, timezone: ${timeZone}.`
+        message: `
+            Locale: ${systemLocale}, timezone: ${timeZone}.
+            Server is listening on ${protocol}://localhost:${PORT} in ${env.ENVIRONMENT}.
+        `
     });
-    logger.info(`Server is listening on ${protocol}://localhost:${PORT} in ${env.ENVIRONMENT}.`);
+    // logger.info(`Server is listening on ${protocol}://localhost:${PORT} in ${env.ENVIRONMENT}.`);
 });
 
 const emitBotMessage = (response, cb) => {
