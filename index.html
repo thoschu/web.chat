@@ -706,6 +706,8 @@
                 console.log('<<< data <<<');
                 // console.dir(data);
 
+                // const {candidate, sdp} = data;
+
                 if (data.candidate) {
                     const rtcIceCandidate = new RTCIceCandidate(data.candidate);
 
@@ -724,7 +726,7 @@
                             console.log('>>> answer >>>');
                             // console.dir(answer);
 
-                            socket.emit('signal', {'sdp': answer});
+                            socket.emit('signal', { 'sdp': answer });
 
                             // rtcPeerConnection.createAnswer({}).then(async answer => {
                             //     await rtcPeerConnection.setLocalDescription(answer);
