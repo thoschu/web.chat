@@ -25,7 +25,8 @@
     "dotenv:chat": "dotenv -- npm run _chat",
     "dotenv:tunnel:tls": "dotenv -- npm run _tunnel",
     "mkcert": "npx mkcert create-ca && npx mkcert create-cert",
-    "icu": "nvm install node --with-intl=full-icu"
+    "icu": "nvm install node --with-intl=full-icu",
+    "turn-server": "docker run -d -p 3478:3478 -p 3478:3478/udp -p 5349:5349 -p 5349:5349/udp -p 49160-49200:49160-49200/udp coturn/coturn --min-port=49160 --max-port=49200"
   },
   "repository": {
     "type": "git",

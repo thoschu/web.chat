@@ -94,3 +94,20 @@ https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
     ~23. CLIENT1 waits for ICE candidates and tracks
 
 21 & 23 are waiting for ICE. Once ICE is exchanged, tracks will exchange
+
+---
+
+```
+docker run -d --network=host  \
+           -v $(pwd)/my.conf:/my/coturn.conf \
+       coturn/coturn -c /my/coturn.conf
+```
+
+```
+listening-port=3478
+tls-listening-port=5349
+fingerprint
+lt-cred-mech
+user=user1:pass1
+syslog
+```

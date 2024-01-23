@@ -384,7 +384,7 @@
                         <video muted id="remote-video-record-${id}" width="300"></video>
                     `,
                     hideCallback: () => {
-                        console.dir(popup);
+                        // console.dir(popup);
                     },
                     loadCallback: () => {
                         let video = document.getElementById(`remote-video-record-${id}`);
@@ -398,6 +398,7 @@
 
             const configuration = {
                 'iceServers': [
+                    // STUN-Server
                     {
                         'urls': [
                             'stun:stun.l.google.com:19302',
@@ -420,6 +421,12 @@
                             // 'stun:stun.voxgratia.org',
                             'stun:stun.xten.com'
                         ]
+                    },
+                    // TURN-Server
+                    {
+                        urls: 'turn:localhost:3478',
+                        username: 'user1',
+                        credential: 'pass1'
                     }
                 ]
             };
@@ -427,7 +434,7 @@
 
             // rtcPeerConnection.addEventListener('icecandidate', () =>{});
             rtcPeerConnection.onicecandidate = event => {
-                console.log('>>> onicecandidate');
+                console.log('>>> onicecandidate >>>');
 
                 if (event.candidate) {
                     socket.emit('signal', { 'candidate': event.candidate });
@@ -435,154 +442,8 @@
             };
 
             rtcPeerConnection.addEventListener('signalingstatechange', (event) => {
-                console.log('!!! .. signalingstatechange');
+                console.log('*** signalingstatechange ***');
                 console.dir(event);
-            });
-
-            const collection = document.getElementsByClassName('iziToast');
-
-            if(collection.length !== 0) {
-                iziToast.destroy();
-            }
-
-            iziToast.show({
-                id: socket.id,
-                class: '',
-                title: '',
-                titleColor: '',
-                titleSize: '',
-                titleLineHeight: '',
-                message: `
-                            <video autoplay muted id="local-video" width="300">
-                                <!--
-                                <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
-                                <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
-                                -->
-                                Your browser does not support the video tag.
-                            </video>
-                        `,
-                messageColor: '',
-                messageSize: '',
-                messageLineHeight: '',
-                backgroundColor: 'transparent',
-                theme: null,
-                color: '',
-                icon: '',
-                iconText: '',
-                iconColor: '',
-                iconUrl: null,
-                image: '',
-                imageWidth: 0,
-                maxWidth: null,
-                zindex: 10000001,
-                layout: 1,
-                balloon: false,
-                close: false,
-                closeOnEscape: false,
-                closeOnClick: false,
-                displayMode: 0,
-                position: 'topRight',
-                target: '',
-                targetFirst: true,
-                timeout: null,
-                rtl: false,
-                animateInside: true,
-                drag: false,
-                pauseOnHover: true,
-                resetOnHover: false,
-                progressBar: false,
-                progressBarColor: '',
-                progressBarEasing: 'linear',
-                overlay: false,
-                overlayClose: false,
-                overlayColor: 'rgba(0, 0, 0, 0.6)',
-                transitionIn: 'fadeInUp',
-                transitionOut: 'fadeOut',
-                transitionInMobile: 'fadeInUp',
-                transitionOutMobile: 'fadeOutDown',
-                buttons: {},
-                inputs: {},
-                onOpening: () => {},
-                onOpened: (_element) => {
-                    const localVideo = document.getElementById("local-video");
-                    const constraints = {
-                        video: {
-                            width: true,
-                            width: {
-                                // min: 1024,
-                                // ideal: 1280,
-                                // max: 3840,
-                                // exact: 1920
-                            },
-                            height: {
-                                // min: 567,
-                                // ideal: 720,
-                                // max: 2160,
-                                // exact: 1080
-                            }
-                        },
-                        audio: true
-                    };
-
-                    if (navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({video: true, audio: true})
-                            .then((stream) => {
-                                localVideo.srcObject = stream;
-
-                                // ToDo: FFmpeg
-                                // mediaRecorder = new MediaRecorder(stream);
-                                //
-                                // mediaRecorder.ondataavailable = event => {
-                                //     if (event.data && event.data.size > 0) {
-                                //         recordedBlobs.push(event.data);
-                                //     }
-                                // };
-                                //
-                                // mediaRecorder.start();
-
-                                stream.getTracks().forEach(track => {
-                                    //console.log(track);
-                                    //console.log(track.getConstraints());
-                                    //console.log(track.getCapabilities());
-                                    //console.log(track.getSettings());
-
-                                    if(track.kind === 'video') {
-                                        track.applyConstraints({
-                                            width: {
-                                                exact: 300
-                                            },
-                                            height: {
-                                                exact: 300
-                                            }
-                                        });
-                                    }
-
-                                    rtcPeerConnection.addTrack(track, stream);
-                                });
-
-                                rtcPeerConnection.createOffer()
-                                    .then(async offer => {
-                                        console.log('>>> offer');
-                                        // console.dir(offer);
-
-                                        await rtcPeerConnection.setLocalDescription(offer);
-
-                                        return rtcPeerConnection.localDescription;
-                                    })
-                                    .then((sdp) => {
-                                        console.log('>>> sdp');
-                                        // console.dir(sdp);
-
-                                        socket.emit('signal', { sdp });
-                                    });
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                            });
-                    }
-                },
-                onClosing: () => {},
-                onClosed: () => {}
             });
 
             socket.on('connect', () => {
@@ -615,10 +476,155 @@
                 });
             });
 
-            console.log(navigator.mediaDevices.getSupportedConstraints());
+            // console.dir(navigator.mediaDevices.getSupportedConstraints());
 
             socket.on('new user', (newId, emit = true) => {
                 if (newId !== socket.id) {
+
+                    const collection = document.getElementsByClassName('iziToast');
+
+                    if(collection.length !== 0) {
+                        iziToast.destroy();
+                    }
+
+                    iziToast.show({
+                        id: socket.id,
+                        class: '',
+                        title: '',
+                        titleColor: '',
+                        titleSize: '',
+                        titleLineHeight: '',
+                        message: `
+                            <video autoplay muted id="local-video" width="300">
+                                <!--
+                                <source src="//www.thomas-schulte.de/video/video2.mp4" type="video/mp4">
+                                <source src="//www.thomas-schulte.de/video/video2.ogg" type="video/ogg">
+                                -->
+                                Your browser does not support the video tag.
+                            </video>
+                        `,
+                        messageColor: '',
+                        messageSize: '',
+                        messageLineHeight: '',
+                        backgroundColor: 'transparent',
+                        theme: null,
+                        color: '',
+                        icon: '',
+                        iconText: '',
+                        iconColor: '',
+                        iconUrl: null,
+                        image: '',
+                        imageWidth: 0,
+                        maxWidth: null,
+                        zindex: 10000001,
+                        layout: 1,
+                        balloon: false,
+                        close: false,
+                        closeOnEscape: false,
+                        closeOnClick: false,
+                        displayMode: 0,
+                        position: 'topRight',
+                        target: '',
+                        targetFirst: true,
+                        timeout: null,
+                        rtl: false,
+                        animateInside: true,
+                        drag: false,
+                        pauseOnHover: true,
+                        resetOnHover: false,
+                        progressBar: false,
+                        progressBarColor: '',
+                        progressBarEasing: 'linear',
+                        overlay: false,
+                        overlayClose: false,
+                        overlayColor: 'rgba(0, 0, 0, 0.6)',
+                        transitionIn: 'fadeInUp',
+                        transitionOut: 'fadeOut',
+                        transitionInMobile: 'fadeInUp',
+                        transitionOutMobile: 'fadeOutDown',
+                        buttons: {},
+                        inputs: {},
+                        onOpening: () => {},
+                        onOpened: (_element) => {
+                            const localVideo = document.getElementById("local-video");
+                            const constraints = {
+                                video: {
+                                    width: true,
+                                    width: {
+                                        // min: 1024,
+                                        // ideal: 1280,
+                                        // max: 3840,
+                                        // exact: 1920
+                                    },
+                                    height: {
+                                        // min: 567,
+                                        // ideal: 720,
+                                        // max: 2160,
+                                        // exact: 1080
+                                    }
+                                },
+                                audio: true
+                            };
+
+                            if (navigator.mediaDevices.getUserMedia) {
+                                navigator.mediaDevices.getUserMedia({video: true, audio: true})
+                                    .then((stream) => {
+                                        localVideo.srcObject = stream;
+
+                                        // ToDo: FFmpeg
+                                        // mediaRecorder = new MediaRecorder(stream);
+                                        //
+                                        // mediaRecorder.ondataavailable = event => {
+                                        //     if (event.data && event.data.size > 0) {
+                                        //         recordedBlobs.push(event.data);
+                                        //     }
+                                        // };
+                                        //
+                                        // mediaRecorder.start();
+
+                                        stream.getTracks().forEach(track => {
+                                            //console.log(track);
+                                            //console.log(track.getConstraints());
+                                            //console.log(track.getCapabilities());
+                                            //console.log(track.getSettings());
+
+                                            if(track.kind === 'video') {
+                                                track.applyConstraints({
+                                                    width: {
+                                                        exact: 300
+                                                    },
+                                                    height: {
+                                                        exact: 300
+                                                    }
+                                                });
+                                            }
+
+                                            rtcPeerConnection.addTrack(track, stream);
+                                        });
+
+                                        rtcPeerConnection.createOffer()
+                                            .then(async offer => {
+                                                // console.dir(offer);
+
+                                                await rtcPeerConnection.setLocalDescription(offer);
+
+                                                return rtcPeerConnection.localDescription;
+                                            })
+                                            .then((sdp) => {
+                                                console.log('>>> sdp >>>');
+                                                // console.dir(sdp);
+
+                                                socket.emit('signal', { sdp });
+                                            });
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                    });
+                            }
+                        },
+                        onClosing: () => {},
+                        onClosed: () => {}
+                    });
 
 
                     iziToast.show({
@@ -672,12 +678,11 @@
 
                                             worker.postMessage(recordedBlobs);
                                         }
-
                                     });
 
                                     mediaRecorder.start();
 
-                                    console.log("recorder started: " + mediaRecorder.state);
+                                    // console.log("recorder started: " + mediaRecorder.state);
                                 };
                             }
                         },
@@ -698,32 +703,40 @@
             });
 
             socket.on('signal', data => {
-                console.log('<<< . data');
+                console.log('<<< data <<<');
                 // console.dir(data);
 
                 if (data.candidate) {
                     const rtcIceCandidate = new RTCIceCandidate(data.candidate);
 
-                    console.log('<<< .. rtcIceCandidate');
+                    console.log('<<< rtcIceCandidate <<<');
                     // console.dir(rtcIceCandidate);
 
                     rtcPeerConnection.addIceCandidate(rtcIceCandidate);
                 } else if (data.sdp) {
                     const sdp = new RTCSessionDescription(data.sdp);
 
-                    rtcPeerConnection.setRemoteDescription(sdp).then(() => {
+                    rtcPeerConnection.setRemoteDescription(sdp).then(async () => {
                         if (sdp.type === 'offer') {
-                            rtcPeerConnection.createAnswer({}).then(async answer => {
-                                await rtcPeerConnection.setLocalDescription(answer);
+                            const answer = await rtcPeerConnection.createAnswer({});
+                            await rtcPeerConnection.setLocalDescription(answer);
 
-                                console.log('>>> answer');
-                                console.dir(answer);
+                            console.log('>>> answer >>>');
+                            // console.dir(answer);
 
-                                socket.emit('signal', {'sdp': answer});
-                            });
+                            socket.emit('signal', {'sdp': answer});
+
+                            // rtcPeerConnection.createAnswer({}).then(async answer => {
+                            //     await rtcPeerConnection.setLocalDescription(answer);
+                            //
+                            //     console.log('>>> answer >>>');
+                            //     // console.dir(answer);
+                            //
+                            //     socket.emit('signal', {'sdp': answer});
+                            // });
                         } else if (sdp.type === 'answer') {
-                            console.log('!!! answer');
-                        }
+                            // console.log('!!! answer');
+                        } else {}
                     });
                 }
             });
@@ -808,7 +821,7 @@
 
                     try {
                         captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-                        console.dir(captureStream);
+                        // console.dir(captureStream);
 
                         mediaScreenRecorder = new MediaRecorder(captureStream);
 
@@ -823,10 +836,10 @@
                         mediaScreenRecorder.start();
 
                         captureStream.getTracks().forEach(track => {
-                            console.log(track);
+                            // console.log(track);
 
                             track.onended = (event) => {
-                                console.dir(event);
+                                // console.dir(event);
 
                                 mediaScreenRecorder.stop();
                             };
@@ -880,7 +893,7 @@
                                 videoInput = document.querySelector('#video-input');
 
                                 devices.forEach(device => {
-                                    console.log(device);
+                                    // console.dir(device);
                                     const option = document.createElement('option');
                                     option.value = device.deviceId;
                                     option.text = device.label;
@@ -895,7 +908,7 @@
                                 });
                             },
                             afterShown: (res) => {
-                                console.dir(res);
+                                // console.dir(res);
                                 const localVideo = document.getElementById("local-video");
 
                                 audioInput.addEventListener('change', async (event) => {
@@ -915,7 +928,7 @@
 
                                     const tracks = stream.getAudioTracks();
 
-                                    console.dir(tracks);
+                                    // console.dir(tracks);
                                 });
 
                                 audioOutput.addEventListener('change', async (event) => {
@@ -923,7 +936,7 @@
 
                                     await localVideo.setSinkId(deviceId);
 
-                                    console.dir('Changed audio output device: ' + deviceId);
+                                    // console.log('Changed audio output device: ' + deviceId);
                                 });
 
                                 videoInput.addEventListener('change', async (event) => {
@@ -943,7 +956,7 @@
 
                                     const tracks = stream.getVideoTracks();
 
-                                    console.dir(tracks);
+                                    // console.dir(tracks);
                                 });
                             },
                             beforeHide: () => {},
