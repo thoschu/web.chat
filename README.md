@@ -97,10 +97,10 @@ https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
 
 ---
 
-```
-docker run -d --network=host  \
-           -v $(pwd)/my.conf:/my/coturn.conf \
-       coturn/coturn -c /my/coturn.conf
+### TURN-Server
+
+```bash
+docker run -d --network=host -v $(pwd)/turnserver.conf:/etc/coturn/turnserver.conf coturn/coturn
 ```
 
 ```
