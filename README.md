@@ -17,8 +17,39 @@ https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
 
 ---
 
-1. Someone must getUserMedia() - CLIENT1/Init/Caller/Offerer
-2. CLIENT1 creates RTCPeerConnection
+1. CLIENT1 creates RTCPeerConnection
+```javascript
+    const rtcPeerConnection = new RTCPeerConnection({
+        'iceServers': [
+            {
+                'urls': [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun.xten.com'
+                ]
+            }
+        ]
+    });
+```
+
+2. Someone must getUserMedia() - CLIENT1/Init/Caller/Offerer
+```javascript
+    // [...]
+    if (navigator.mediaDevices.getUserMedia) {
+        // const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then((stream) => {
+                localVideo.srcObject = stream;
+
+                stream.getTracks().forEach(track => {
+                    rtcPeerConnection.addTrack(track, stream);
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+```
+
 3. peerConnection needs STUN servers
     - we will need ICE candidates later
 4. CLIENT1 add localstream tracks to peerConnection

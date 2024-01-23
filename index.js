@@ -104,6 +104,14 @@ const users = new Set();
 app.use('/assets', express.static('assets'));
 
 io.on('connection', async (socket) => {
+    const token = socket.handshake.auth.token;
+
+    if(token !== env.TOKEN) {
+        socket.disconnect(true);
+
+        return;
+    }
+
     if (env.ENVIRONMENT !== 'development') {
         const response = await getBotResponse(`a user connected`);
 
@@ -118,7 +126,15 @@ io.on('connection', async (socket) => {
 
     socket.broadcast.emit('new user', socket.id);
 
-    socket.on('signal', (data) => {
+    socket.on('signal', data => {
+        const { candidate, sdp } = data;
+
+        if(candidate) {
+            logger.info(`candidate: ${JSON.stringify(candidate.usernameFragment)}`);
+        } else if(sdp) {
+            logger.info(`sdp: ${JSON.stringify(sdp.type)}`);
+        }
+
         socket.broadcast.emit('signal', data);
     });
 
