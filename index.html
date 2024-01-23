@@ -398,7 +398,7 @@
 
             const configuration = {
                 'iceServers': [
-                    // STUN-Server
+                    // STUN-Server (Session Traversal Utilities for NAT)
                     {
                         'urls': [
                             'stun:stun.l.google.com:19302',
@@ -422,7 +422,7 @@
                             'stun:stun.xten.com'
                         ]
                     },
-                    // TURN-Server
+                    // TURN-Server (Traversal Using Relays around NAT), extension of STUN
                     {
                         urls: 'turn:localhost:3478',
                         username: 'user1',
@@ -665,10 +665,19 @@
                             const remoteVideo = document.getElementById(`remote-video-${newId}`);
 
                             if (navigator.mediaDevices.getUserMedia) {
+                                // rtcPeerConnection.addEventListener('track', () => {});
                                 rtcPeerConnection.ontrack = event => {
+                                    console.log('###########################');
+                                    console.dir(event);
+                                    console.log('###########################');
                                     const stream = event.streams[0];
 
                                     remoteVideo.srcObject = stream;
+                                    // const remoteStream = new MediaStream();
+                                    // remoteVideo.srcObject = remoteStream;
+                                    // stream.getTracks().forEach(track => {
+                                    //     remoteStream.addTrack(track);
+                                    // });
 
                                     mediaRecorder = new MediaRecorder(stream);
 
@@ -727,9 +736,11 @@
                             console.log('>>> answer >>>');
                             // console.dir(answer);
 
-                            socket.emit('signal', { 'sdp': answer });
+                            // socket.emit('signal', { 'sdp': answer });
 
-                            // socket.emitWithAck('signal', { 'sdp': answer });
+                            const ack = await socket.emitWithAck('signal', { 'sdp': answer });
+
+                            // console.dir(ack);
 
                             // rtcPeerConnection.createAnswer({}).then(async answer => {
                             //     await rtcPeerConnection.setLocalDescription(answer);
