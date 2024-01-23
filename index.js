@@ -64,7 +64,6 @@ const openai = new OpenAI({
     apiKey: env.OPENAI_APIKEY
 });
 
-
 const logger = winston.createLogger({
     level: "info",
     format: winston.format.combine(
