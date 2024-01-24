@@ -109,6 +109,8 @@ io.on('connection', async (socket) => {
     if(token !== env.TOKEN) {
         socket.disconnect(true);
 
+        logger.info(`Socket disconnect: ${token} - ${socket.id}`);
+
         return;
     }
 
