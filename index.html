@@ -419,17 +419,43 @@
                             // 'stun:stun.voipbuster.com',
                             // 'stun:stun.voipstunt.com',
                             // 'stun:stun.voxgratia.org',
-                            'stun:stun.xten.com'
+                            // 'stun:stun.xten.com'
                         ]
                     },
                     // TURN-Server (Traversal Using Relays around NAT), extension of STUN
+                    {
+                        urls: 'turn:numb.viagenie.ca',
+                        credential: 'muazkh',
+                        username: 'webrtc@live.com'
+                    },
+                    // {
+                    //     "username": "dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+                    //     "credential": "tE2DajzSJwnsSbc123",
+                    //     "urls": "turn:global.turn.twilio.com:3478?transport=udp"
+                    // },
+                    // {
+                    //     "username": "dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+                    //     "credential": "tE2DajzSJwnsSbc123",
+                    //     "urls": "turn:global.turn.twilio.com:3478?transport=tcp"
+                    // },
+                    // {
+                    //     "username": "dc2d2894d5a9023620c467b0e71cfa6a35457e6679785ed6ae9856fe5bdfa269",
+                    //     "credential": "tE2DajzSJwnsSbc123",
+                    //     "urls": "turn:global.turn.twilio.com:443?transport=tcp"
+                    // }
+                    /*
                     {
                         urls: 'turn:localhost:3478',
                         username: 'user1',
                         credential: 'pass1'
                     }
+                     */
                 ]
             };
+            // const response = await fetch('//thoschu.metered.live/api/v1/turn/credentials?apiKey=72f47331a1cec8d53e14b9a86b2f31b302ac');
+            // const iceServers = await response.json();
+            // const rtcPeerConnection = new RTCPeerConnection({ iceServers });
+
             const rtcPeerConnection = new RTCPeerConnection(configuration);
 
             // rtcPeerConnection.addEventListener('icecandidate', () =>{});
@@ -549,7 +575,6 @@
                             const localVideo = document.getElementById("local-video");
                             const constraints = {
                                 video: {
-                                    width: true,
                                     width: {
                                         // min: 1024,
                                         // ideal: 1280,
@@ -667,9 +692,6 @@
                             if (navigator.mediaDevices.getUserMedia) {
                                 // rtcPeerConnection.addEventListener('track', () => {});
                                 rtcPeerConnection.ontrack = event => {
-                                    console.log('###########################');
-                                    console.dir(event);
-                                    console.log('###########################');
                                     const stream = event.streams[0];
 
                                     remoteVideo.srcObject = stream;

@@ -6,6 +6,7 @@ const fs = require('fs');
 const https = require('https');
 const axios = require('axios');
 const express = require('express');
+const winston = require('winston');
 const { createServer} = require('node:http');
 const { join} = require('node:path');
 const { Server } = require('socket.io');
@@ -14,7 +15,7 @@ const { createTransport } = require('nodemailer');
 const { from, first, of, map} = require('rxjs');
 const { head } = require('ramda');
 const { v4: uuidv4 } = require('uuid');
-const winston = require('winston');
+
 //const { WebSocketServer, WebSocket } = require('ws');
 //
 //const wss = new WebSocketServer({ port: 3030 });
@@ -83,7 +84,7 @@ const logger = winston.createLogger({
     defaultMeta: { service: 'chat-service' },
     transports: [
         new winston.transports.Console(),
-        new winston.transports.File({ filename: "logs/app.log" }),
+        new winston.transports.File({ filename: 'logs/app.log' }),
     ],
 });
 
